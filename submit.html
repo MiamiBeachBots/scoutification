@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FRC Scouting - Direct Submit (WiFi Required)">
+    <meta name="theme-color" content="#1a1a1a">
+    <title>FRC Scouting – Direct Submit</title>
+
+    <style>
+        /* Dark Mode High Contrast Theme — matches index.html */
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3a3a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent-primary: #4CAF50;
+            --accent-secondary: #2196F3;
+            --accent-danger: #f44336;
+            --accent-warning: #FF9800;
+            --border-color: #555;
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 1.5rem 0;
+            border-bottom: 2px solid var(--accent-secondary);
+            margin-bottom: 2rem;
+        }
+
+        h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+
+        h2 {
+            font-size: 1.4rem;
+            margin: 1.5rem 0 1rem 0;
+            color: var(--accent-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .subtitle { color: var(--text-secondary); font-size: 0.9rem; }
+
+        .badge {
+            display: inline-block;
+            background-color: var(--accent-secondary);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .form-section {
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-group { margin-bottom: 1.5rem; }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-secondary);
+        }
+
+        textarea { min-height: 100px; resize: vertical; font-family: inherit; }
+
+        /* Counter Controls */
+        .counter-control {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background-color: var(--bg-tertiary);
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 2px solid var(--border-color);
+        }
+
+        .counter-btn {
+            width: 60px; height: 60px;
+            font-size: 2rem; font-weight: 700;
+            background-color: var(--accent-primary);
+            color: var(--text-primary);
+            border: none; border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .counter-btn:active { transform: scale(0.95); }
+        .counter-btn.minus { background-color: var(--accent-danger); }
+
+        .counter-value {
+            flex: 1; text-align: center;
+            font-size: 1.8rem; font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* Checkbox */
+        .checkbox-wrapper {
+            display: flex; align-items: center;
+            gap: 1rem; padding: 0.75rem;
+            background-color: var(--bg-tertiary);
+            border-radius: 4px; cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            width: 30px; height: 30px;
+            cursor: pointer;
+            accent-color: var(--accent-primary);
+        }
+
+        /* Buttons */
+        .btn-group { display: flex; gap: 1rem; margin-top: 2rem; }
+
+        .btn {
+            flex: 1;
+            padding: 1rem 2rem;
+            font-size: 1.1rem; font-weight: 700;
+            border: none; border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary { background-color: var(--accent-secondary); color: var(--text-primary); }
+        .btn-secondary { background-color: var(--bg-tertiary); color: var(--text-primary); border: 2px solid var(--border-color); }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 4px 8px var(--shadow); }
+        .btn:active { transform: translateY(0); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* Status Messages */
+        .status-message {
+            padding: 1.2rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .status-success {
+            background-color: rgba(76, 175, 80, 0.2);
+            border: 2px solid var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .status-error {
+            background-color: rgba(244, 67, 54, 0.2);
+            border: 2px solid var(--accent-danger);
+            color: var(--accent-danger);
+        }
+
+        .status-loading {
+            background-color: rgba(33, 150, 243, 0.2);
+            border: 2px solid var(--accent-secondary);
+            color: var(--accent-secondary);
+        }
+
+        /* Spinner */
+        .spinner {
+            display: inline-block;
+            width: 18px; height: 18px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: currentColor;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            body { padding: 0.5rem; }
+            h1 { font-size: 1.5rem; }
+            .form-section { padding: 1rem; }
+            .counter-btn { width: 50px; height: 50px; font-size: 1.5rem; }
+            .counter-value { font-size: 1.5rem; }
+            .btn-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🤖 FRC Scouting <span class="badge">Direct Submit</span></h1>
+        <p class="subtitle">WiFi mode — data goes straight to the server, no QR code needed</p>
+    </header>
+
+    <main>
+        <div id="status-container"></div>
+
+        <form id="scouting-form">
+            <!-- Form fields generated dynamically by app logic below -->
+        </form>
+
+        <div class="btn-group">
+            <button type="button" class="btn btn-secondary" id="reset-btn">Reset Form</button>
+            <button type="button" class="btn btn-primary" id="submit-btn">Submit to Server</button>
+        </div>
+    </main>
+
+    <script src="config.js?v=2026b"></script>
+    <script>
+    // ---------------------------------------------------------------
+    // Direct Submit App — same form as index.html but sends data to
+    // the API directly instead of generating a QR code.
+    // ---------------------------------------------------------------
+    class DirectSubmitApp {
+        constructor() {
+            this.form = document.getElementById('scouting-form');
+            this.submitBtn = document.getElementById('submit-btn');
+            this.resetBtn = document.getElementById('reset-btn');
+            this.statusContainer = document.getElementById('status-container');
+
+            this.counterValues = {};
+
+            // API endpoint — always the production server
+            this.apiEndpoint = '/api/submit';
+
+            this.init();
+        }
+
+        init() {
+            this.renderForm();
+            this.attachEventListeners();
+            this.loadFromLocalStorage();
+        }
+
+        renderForm() {
+            const categorizedFields = {};
+            CONFIG.fields.forEach(field => {
+                if (!categorizedFields[field.category]) categorizedFields[field.category] = [];
+                categorizedFields[field.category].push(field);
+            });
+
+            Object.keys(CONFIG.categories).forEach(categoryKey => {
+                if (!categorizedFields[categoryKey]) return;
+
+                const section = document.createElement('div');
+                section.className = 'form-section';
+
+                const heading = document.createElement('h2');
+                heading.textContent = CONFIG.categories[categoryKey];
+                section.appendChild(heading);
+
+                categorizedFields[categoryKey].forEach(field => {
+                    section.appendChild(this.createFormField(field));
+                });
+
+                this.form.appendChild(section);
+            });
+        }
+
+        createFormField(field) {
+            const formGroup = document.createElement('div');
+            formGroup.className = 'form-group';
+
+            const label = document.createElement('label');
+            label.textContent = field.label + (field.required ? ' *' : '');
+            label.setAttribute('for', field.id);
+            formGroup.appendChild(label);
+
+            let input;
+            switch (field.type) {
+                case 'counter':   input = this.createCounter(field);  break;
+                case 'checkbox':  input = this.createCheckbox(field); break;
+                case 'dropdown':  input = this.createDropdown(field); break;
+                case 'textarea':  input = this.createTextarea(field); break;
+                case 'number':    input = this.createNumber(field);   break;
+                default:          input = this.createText(field);     break;
+            }
+
+            formGroup.appendChild(input);
+            return formGroup;
+        }
+
+        createCounter(field) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'counter-control';
+
+            const minus = document.createElement('button');
+            minus.type = 'button';
+            minus.className = 'counter-btn minus';
+            minus.textContent = '−';
+
+            const display = document.createElement('div');
+            display.className = 'counter-value';
+            display.textContent = '0';
+            display.id = field.id + '-value';
+
+            const plus = document.createElement('button');
+            plus.type = 'button';
+            plus.className = 'counter-btn plus';
+            plus.textContent = '+';
+
+            this.counterValues[field.id] = 0;
+
+            minus.addEventListener('click', () => {
+                const min = field.min !== undefined ? field.min : 0;
+                if (this.counterValues[field.id] > min) {
+                    this.counterValues[field.id]--;
+                    display.textContent = this.counterValues[field.id];
+                    this.saveToLocalStorage();
+                }
+            });
+
+            plus.addEventListener('click', () => {
+                const max = field.max !== undefined ? field.max : 999;
+                if (this.counterValues[field.id] < max) {
+                    this.counterValues[field.id]++;
+                    display.textContent = this.counterValues[field.id];
+                    this.saveToLocalStorage();
+                }
+            });
+
+            wrapper.appendChild(minus);
+            wrapper.appendChild(display);
+            wrapper.appendChild(plus);
+            return wrapper;
+        }
+
+        createCheckbox(field) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'checkbox-wrapper';
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.id = field.id;
+            cb.name = field.id;
+            const lbl = document.createElement('label');
+            lbl.textContent = 'Yes';
+            lbl.setAttribute('for', field.id);
+            lbl.style.marginBottom = '0';
+            cb.addEventListener('change', () => this.saveToLocalStorage());
+            wrapper.appendChild(cb);
+            wrapper.appendChild(lbl);
+            return wrapper;
+        }
+
+        createDropdown(field) {
+            const select = document.createElement('select');
+            select.id = field.id;
+            select.name = field.id;
+            select.required = field.required || false;
+            if (!field.required) {
+                const def = document.createElement('option');
+                def.value = '';
+                def.textContent = '-- Select --';
+                select.appendChild(def);
+            }
+            field.options.forEach(opt => {
+                const o = document.createElement('option');
+                o.value = opt;
+                o.textContent = opt;
+                select.appendChild(o);
+            });
+            select.addEventListener('change', () => this.saveToLocalStorage());
+            return select;
+        }
+
+        createTextarea(field) {
+            const ta = document.createElement('textarea');
+            ta.id = field.id;
+            ta.name = field.id;
+            ta.placeholder = field.label;
+            ta.addEventListener('input', () => this.saveToLocalStorage());
+            return ta;
+        }
+
+        createNumber(field) {
+            const inp = document.createElement('input');
+            inp.type = 'number';
+            inp.id = field.id;
+            inp.name = field.id;
+            inp.required = field.required || false;
+            inp.placeholder = field.label;
+            if (field.min !== undefined) inp.min = field.min;
+            if (field.max !== undefined) inp.max = field.max;
+            inp.addEventListener('input', () => this.saveToLocalStorage());
+            return inp;
+        }
+
+        createText(field) {
+            const inp = document.createElement('input');
+            inp.type = 'text';
+            inp.id = field.id;
+            inp.name = field.id;
+            inp.required = field.required || false;
+            inp.placeholder = field.label;
+            inp.addEventListener('input', () => this.saveToLocalStorage());
+            return inp;
+        }
+
+        attachEventListeners() {
+            this.submitBtn.addEventListener('click', () => this.handleSubmit());
+            this.resetBtn.addEventListener('click', () => this.handleReset());
+        }
+
+        collectFormData() {
+            const data = { timestamp: new Date().toISOString() };
+            CONFIG.fields.forEach(field => {
+                if (field.type === 'counter') {
+                    data[field.id] = this.counterValues[field.id] || 0;
+                } else if (field.type === 'checkbox') {
+                    const cb = document.getElementById(field.id);
+                    data[field.id] = cb ? cb.checked : false;
+                } else {
+                    const el = document.getElementById(field.id);
+                    data[field.id] = el ? el.value : '';
+                }
+            });
+            return data;
+        }
+
+        validateFormData(data) {
+            const errors = [];
+            CONFIG.fields.forEach(field => {
+                if (field.required) {
+                    const v = data[field.id];
+                    if (v === '' || v === null || v === undefined) {
+                        errors.push(`${field.label} is required`);
+                    }
+                }
+            });
+            return errors;
+        }
+
+        async handleSubmit() {
+            const data = this.collectFormData();
+            const errors = this.validateFormData(data);
+
+            if (errors.length > 0) {
+                this.showStatus(errors.join('<br>'), 'error');
+                return;
+            }
+
+            // Disable button and show loading
+            this.submitBtn.disabled = true;
+            this.showStatus('<span class="spinner"></span>Sending to server…', 'loading');
+
+            try {
+                const response = await fetch(this.apiEndpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || `HTTP ${response.status}`);
+                }
+
+                const result = await response.json();
+                this.showStatus(
+                    `✅ Saved! Match ${data.match_number}, Team ${data.team_number} (${data.alliance} alliance)`,
+                    'success'
+                );
+
+                // Clear draft after successful save
+                localStorage.removeItem('submitFormDraft');
+
+                // Reset after short delay so scouter can see success
+                setTimeout(() => {
+                    this.handleReset(true);
+                }, 2000);
+
+            } catch (error) {
+                this.showStatus(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                this.submitBtn.disabled = false;
+            }
+        }
+
+        handleReset(silent = false) {
+            if (!silent && !confirm('Reset the form?')) return;
+
+            Object.keys(this.counterValues).forEach(key => {
+                this.counterValues[key] = 0;
+                const el = document.getElementById(key + '-value');
+                if (el) el.textContent = '0';
+            });
+
+            this.form.reset();
+            localStorage.removeItem('submitFormDraft');
+            if (!silent) this.showStatus('Form reset.', 'success');
+        }
+
+        saveToLocalStorage() {
+            localStorage.setItem('submitFormDraft', JSON.stringify(this.collectFormData()));
+        }
+
+        loadFromLocalStorage() {
+            const saved = localStorage.getItem('submitFormDraft');
+            if (!saved) return;
+            try {
+                const data = JSON.parse(saved);
+                CONFIG.fields.forEach(field => {
+                    const v = data[field.id];
+                    if (v === undefined || v === null) return;
+                    if (field.type === 'counter') {
+                        this.counterValues[field.id] = v;
+                        const el = document.getElementById(field.id + '-value');
+                        if (el) el.textContent = v;
+                    } else if (field.type === 'checkbox') {
+                        const cb = document.getElementById(field.id);
+                        if (cb) cb.checked = v;
+                    } else {
+                        const el = document.getElementById(field.id);
+                        if (el) el.value = v;
+                    }
+                });
+            } catch(e) { console.error('Error loading draft:', e); }
+        }
+
+        showStatus(message, type) {
+            this.statusContainer.innerHTML = `
+                <div class="status-message status-${type}">${message}</div>
+            `;
+            if (type === 'success' || type === 'error') {
+                setTimeout(() => { this.statusContainer.innerHTML = ''; }, 6000);
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => new DirectSubmitApp());
+    </script>
+</body>
+</html>
