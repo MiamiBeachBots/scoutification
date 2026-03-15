@@ -1,9 +1,17 @@
 // Configuration for FRC Scouting Form
-// This defines all the fields that will be displayed in the scouting interface
+// 2026 Game: REBUILT — Pre-match strategy collection
 
 const CONFIG = {
   fields: [
-    // Basic Match Information
+    // ── Match Information ──────────────────────────────────
+    {
+      id: "match_number",
+      label: "Match Number",
+      type: "number",
+      required: true,
+      min: 1,
+      category: "match_info"
+    },
     {
       id: "team_number",
       label: "Team Number",
@@ -12,129 +20,128 @@ const CONFIG = {
       category: "match_info"
     },
     {
+      id: "alliance",
+      label: "Alliance",
+      type: "dropdown",
+      required: true,
+      options: ["Red", "Blue"],
+      category: "match_info"
+    },
+    {
       id: "scouter_name",
-      label: "Scouter Name",
+      label: "Your Name",
       type: "text",
       required: true,
       category: "match_info"
     },
 
-    // Autonomous Period
+    // ── Pre-Match ──────────────────────────────────────────
     {
-      id: "auto_balls_scored_upper",
-      label: "Auto: Balls Scored (Upper Hub)",
+      id: "pre_loaded_fuel",
+      label: "How many FUEL is this robot pre-loaded with?",
       type: "counter",
       min: 0,
-      max: 50,
+      max: 8,
+      category: "pre_match"
+    },
+
+    // ── Autonomous ─────────────────────────────────────────
+    {
+      id: "auto_fuel_active_hub",
+      label: "How many FUEL do you expect in the Active HUB during AUTO?",
+      type: "counter",
+      min: 0,
+      max: 999,
       category: "autonomous"
     },
     {
-      id: "auto_balls_scored_lower",
-      label: "Auto: Balls Scored (Lower Hub)",
-      type: "counter",
-      min: 0,
-      max: 50,
-      category: "autonomous"
-    },
-    {
-      id: "auto_taxi",
-      label: "Auto: Left Tarmac (Taxi)",
+      id: "auto_tower_level1",
+      label: "Do you expect this robot to reach TOWER Level 1 in AUTO?",
       type: "checkbox",
       category: "autonomous"
     },
 
-    // Teleop Period
+    // ── Teleoperated ───────────────────────────────────────
     {
-      id: "teleop_balls_scored_upper",
-      label: "Teleop: Balls Scored (Upper Hub)",
+      id: "teleop_fuel_active_hub",
+      label: "How many FUEL do you expect in the Active HUB during TELEOP?",
       type: "counter",
       min: 0,
-      max: 100,
+      max: 999,
       category: "teleop"
     },
     {
-      id: "teleop_balls_scored_lower",
-      label: "Teleop: Balls Scored (Lower Hub)",
+      id: "teleop_fuel_inactive_hub",
+      label: "Do you expect any FUEL in the Inactive HUB? (estimate)",
       type: "counter",
       min: 0,
-      max: 100,
+      max: 999,
       category: "teleop"
     },
     {
-      id: "teleop_balls_missed",
-      label: "Teleop: Balls Missed",
-      type: "counter",
-      min: 0,
-      max: 100,
+      id: "fuel_collection_source",
+      label: "Where does this robot primarily collect FUEL?",
+      type: "dropdown",
+      options: ["Depot", "Neutral Zone", "Outpost"],
       category: "teleop"
     },
 
-    // Endgame
+    // ── End Game ───────────────────────────────────────────
     {
-      id: "climb_level",
-      label: "Climb Level",
+      id: "max_tower_level",
+      label: "What is the highest TOWER Level you expect this robot to reach?",
       type: "dropdown",
-      options: ["None", "Low", "Mid", "High", "Traversal"],
+      options: ["None", "Level 1", "Level 2", "Level 3"],
       category: "endgame"
     },
     {
-      id: "climb_time",
-      label: "Climb Time (seconds)",
-      type: "number",
-      min: 0,
-      max: 135,
-      category: "endgame"
-    },
-
-    // Defense and Notes
-    {
-      id: "defense_rating",
-      label: "Defense Rating",
-      type: "dropdown",
-      options: ["None", "Poor", "Average", "Good", "Excellent"],
-      category: "performance"
-    },
-    {
-      id: "driver_skill",
-      label: "Driver Skill",
-      type: "dropdown",
-      options: ["Poor", "Average", "Good", "Excellent"],
-      category: "performance"
-    },
-    {
-      id: "penalties",
-      label: "Penalties/Fouls",
+      id: "minor_fouls",
+      label: "How many Minor Fouls do you expect from this robot?",
       type: "counter",
       min: 0,
       max: 20,
-      category: "performance"
+      category: "endgame"
     },
     {
-      id: "broke_down",
-      label: "Robot Broke Down",
+      id: "major_fouls",
+      label: "How many Major Fouls do you expect from this robot?",
+      type: "counter",
+      min: 0,
+      max: 10,
+      category: "endgame"
+    },
+
+    // ── Alliance Ranking Points ────────────────────────────
+    {
+      id: "energized_rp",
+      label: "Do you expect ENERGIZED RP? (alliance scores 100+ Active HUB FUEL)",
       type: "checkbox",
-      category: "performance"
+      category: "alliance_rp"
     },
     {
-      id: "notes",
-      label: "Additional Notes",
-      type: "textarea",
-      category: "notes"
+      id: "supercharged_rp",
+      label: "Do you expect SUPERCHARGED RP? (alliance scores 360+ Active HUB FUEL)",
+      type: "checkbox",
+      category: "alliance_rp"
+    },
+    {
+      id: "traversal_rp",
+      label: "Do you expect TRAVERSAL RP? (alliance earns 50+ Tower Points)",
+      type: "checkbox",
+      category: "alliance_rp"
     }
   ],
 
-  // Category display names for grouping
   categories: {
-    match_info: "Match Information",
-    autonomous: "Autonomous Period",
-    teleop: "Teleoperated Period",
-    endgame: "Endgame",
-    performance: "Performance Assessment",
-    notes: "Notes"
+    match_info:  "Match Information",
+    pre_match:   "Pre-Match",
+    autonomous:  "Autonomous (AUTO) — Expectations",
+    teleop:      "Teleoperated (TELEOP) — Expectations",
+    endgame:     "End Game — Expectations",
+    alliance_rp: "Alliance Ranking Points — Predictions"
   }
 };
 
-// Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = CONFIG;
 }
