@@ -12,9 +12,11 @@ services:
       - ./index.html:/usr/share/nginx/html/index.html:ro
       - ./pit.html:/usr/share/nginx/html/pit.html:ro
       - ./scanner.html:/usr/share/nginx/html/scanner.html:ro
+      - ./submit.html:/usr/share/nginx/html/submit.html:ro
       - ./app.js:/usr/share/nginx/html/app.js:ro
       - ./config.js:/usr/share/nginx/html/config.js:ro
       - ./qrcode.min.js:/usr/share/nginx/html/qrcode.min.js:ro
+      - ./html5-qrcode.min.js:/usr/share/nginx/html/html5-qrcode.min.js:ro
       - ./manifest.json:/usr/share/nginx/html/manifest.json:ro
     networks:
       - frc-network
