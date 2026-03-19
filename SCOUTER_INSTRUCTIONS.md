@@ -1,4 +1,4 @@
-# 📱 Scouter Instructions
+#  Scouter Instructions
 
 You are scouting a match. At the end of each match, you'll generate a QR code that the middleman laptop will scan to send your data to the server.
 
@@ -49,7 +49,7 @@ If you have a working WiFi connection to the internet, you can skip the QR code 
 
 Go to: **`https://submit.scout.thaliathenerd.dev`**
 
-Fill out the same form, then tap **"Submit to Server"**. You'll see a green ✅ confirmation. Done — no QR code, no middleman needed.
+Fill out the same form, then tap **"Submit to Server"**. You'll see a green  confirmation. Done — no QR code, no middleman needed.
 
 ---
 

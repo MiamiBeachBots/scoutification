@@ -117,7 +117,7 @@ class ScoutingDashboard:
     # ──────────────────────────────────────────────────────────────
 
     def pick_list_formulation_tab(self):
-        st.header("🎯 Pick List Formulation")
+        st.header(" Pick List Formulation")
         st.markdown("Weighted team rankings for alliance selection.")
 
         df = self.load_data()
@@ -125,7 +125,7 @@ class ScoutingDashboard:
             st.warning("No scouting data yet. Scan some QR codes first!")
             return
 
-        st.sidebar.header("⚖️ Scoring Weights")
+        st.sidebar.header("️ Scoring Weights")
 
         auto_w     = st.sidebar.slider("Auto FUEL",          0.0, 5.0, 1.5, 0.1)
         teleop_w   = st.sidebar.slider("Teleop Active HUB",  0.0, 5.0, 2.0, 0.1)
@@ -151,7 +151,7 @@ class ScoutingDashboard:
         col4.metric("Traversal RP% (avg)", f"{df['Traversal_Rate'].mean()*100:.0f}%")
 
         st.markdown("---")
-        st.subheader("📊 Team Rankings")
+        st.subheader(" Team Rankings")
 
         # Header row
         hcols = st.columns([0.4, 0.4, 1.0, 0.9, 0.9, 0.9, 0.9, 0.9, 0.6])
@@ -161,7 +161,7 @@ class ScoutingDashboard:
         for idx, row in df.iterrows():
             team  = row['team_number']
             rank  = idx + 1
-            emoji = "🥇" if rank <= 8 else ("🥈" if rank <= 24 else "")
+            emoji = "" if rank <= 8 else ("" if rank <= 24 else "")
 
             cols = st.columns([0.4, 0.4, 1.0, 0.9, 0.9, 0.9, 0.9, 0.9, 0.6])
             with cols[0]:
@@ -181,7 +181,7 @@ class ScoutingDashboard:
             cols[8].text(int(row['Matches_Played']))
 
         st.markdown("---")
-        if st.button("📥 Export Pick List (excluding DNP)"):
+        if st.button(" Export Pick List (excluding DNP)"):
             export = df[~df['team_number'].isin(st.session_state.dnp_teams)]
             st.download_button("Download CSV", export.to_csv(index=False),
                                "pick_list.csv", "text/csv")
@@ -191,7 +191,7 @@ class ScoutingDashboard:
     # ──────────────────────────────────────────────────────────────
 
     def team_analysis_tab(self):
-        st.header("📊 Team Analysis")
+        st.header(" Team Analysis")
 
         df = self.load_data()
         if df.empty:
@@ -228,7 +228,7 @@ class ScoutingDashboard:
 
         match_data = self.load_team_match_data(team)
         
-        st.subheader("🛠️ Hardware & Strategy (Pre-Scouting & Latest Match)")
+        st.subheader("️ Hardware & Strategy (Pre-Scouting & Latest Match)")
         p1, p2, p3 = st.columns(3)
         if pre_stats is not None:
             p1.metric("Drive System", pre_stats.get('drive_system', 'N/A'))
@@ -252,7 +252,7 @@ class ScoutingDashboard:
                 st.image(photo_bytes, caption=f"Team {team} Robot (Pit Photo)", use_container_width=True)
 
         if not match_data.empty:
-            st.subheader("📈 FUEL Scored Per Match")
+            st.subheader(" FUEL Scored Per Match")
             melted = match_data[['match_number', 'auto_fuel_active_hub',
                                   'teleop_fuel_active_hub', 'teleop_fuel_inactive_hub']].melt(
                 id_vars='match_number', var_name='Period', value_name='FUEL'
@@ -270,7 +270,7 @@ class ScoutingDashboard:
             ).properties(height=350).interactive()
             st.altair_chart(chart, use_container_width=True)
 
-            st.subheader("🏗️ TOWER Level Per Match")
+            st.subheader("️ TOWER Level Per Match")
             tower_chart = alt.Chart(match_data).mark_bar().encode(
                 x=alt.X('match_number:Q', title='Match'),
                 y=alt.Y('tower_level_num:Q', title='Tower Level', scale=alt.Scale(domain=[0, 3])),
@@ -284,7 +284,7 @@ class ScoutingDashboard:
     # ──────────────────────────────────────────────────────────────
 
     def match_predictor_tab(self):
-        st.header("🔮 Match Predictor")
+        st.header(" Match Predictor")
         st.markdown("Predicts match outcome based on scouted team averages.")
 
         df = self.load_data()
@@ -299,10 +299,10 @@ class ScoutingDashboard:
 
         col1, col2 = st.columns(2)
         with col1:
-            st.subheader("🔴 Red Alliance")
+            st.subheader(" Red Alliance")
             red = st.multiselect("Red teams", teams, max_selections=3, key="red")
         with col2:
-            st.subheader("🔵 Blue Alliance")
+            st.subheader(" Blue Alliance")
             blue = st.multiselect("Blue teams", [t for t in teams if t not in red],
                                   max_selections=3, key="blue")
 
@@ -323,26 +323,26 @@ class ScoutingDashboard:
 
             col1, col2 = st.columns(2)
             with col1:
-                st.subheader("🔴 Red")
+                st.subheader(" Red")
                 for t in red:
                     row = df[df['team_number'] == t].iloc[0]
                     st.markdown(f"**{int(t)}:** Active HUB avg {row['Avg_Total_Active_Hub']:.1f}, "
                                 f"Tower {row['Avg_Tower_Level']:.1f}")
                 st.metric("Expected Score", f"{r_score:.1f}")
                 st.metric("Avg Active HUB FUEL", f"{r_hub:.0f}")
-                energized  = "✅" if r_hub >= 100 else "❌"
-                supercharged = "✅" if r_hub >= 360 else "❌"
+                energized  = "" if r_hub >= 100 else ""
+                supercharged = "" if r_hub >= 360 else ""
                 st.markdown(f"ENERGIZED RP likely: {energized} &nbsp; SUPERCHARGED RP likely: {supercharged}")
             with col2:
-                st.subheader("🔵 Blue")
+                st.subheader(" Blue")
                 for t in blue:
                     row = df[df['team_number'] == t].iloc[0]
                     st.markdown(f"**{int(t)}:** Active HUB avg {row['Avg_Total_Active_Hub']:.1f}, "
                                 f"Tower {row['Avg_Tower_Level']:.1f}")
                 st.metric("Expected Score", f"{b_score:.1f}")
                 st.metric("Avg Active HUB FUEL", f"{b_hub:.0f}")
-                energized  = "✅" if b_hub >= 100 else "❌"
-                supercharged = "✅" if b_hub >= 360 else "❌"
+                energized  = "" if b_hub >= 100 else ""
+                supercharged = "" if b_hub >= 360 else ""
                 st.markdown(f"ENERGIZED RP likely: {energized} &nbsp; SUPERCHARGED RP likely: {supercharged}")
 
             st.markdown("---")
@@ -350,8 +350,8 @@ class ScoutingDashboard:
             r_pct = (r_score / total * 100) if total > 0 else 50
             b_pct = 100 - r_pct
 
-            winner = "🔴 Red Alliance" if r_score > b_score else ("🔵 Blue Alliance" if b_score > r_score else "⚪ Tie")
-            st.subheader(f"🏆 {winner}")
+            winner = " Red Alliance" if r_score > b_score else (" Blue Alliance" if b_score > r_score else " Tie")
+            st.subheader(f" {winner}")
 
             prob = pd.DataFrame({'Alliance': ['Red', 'Blue'], 'Probability': [r_pct, b_pct], 'Color': ['red', 'blue']})
             st.altair_chart(
@@ -371,7 +371,7 @@ class ScoutingDashboard:
     # ──────────────────────────────────────────────────────────────
 
     def raw_data_tab(self):
-        st.header("📄 Raw Data")
+        st.header(" Raw Data")
         df = self.load_raw_data()
         if df.empty:
             st.warning("No scouting data yet.")
@@ -383,7 +383,7 @@ class ScoutingDashboard:
         c3.metric("Matches", df['match_number'].nunique())
 
         st.markdown("---")
-        st.download_button("📥 Download CSV", df.to_csv(index=False),
+        st.download_button(" Download CSV", df.to_csv(index=False),
                            "scouting_data_rebuilt_2026.csv", "text/csv")
         st.markdown("---")
         st.dataframe(df, use_container_width=True, hide_index=True,
@@ -410,15 +410,18 @@ class ScoutingDashboard:
 def main():
     st.set_page_config(
         page_title="FRC Scouting – REBUILT 2026",
-        page_icon="⚡",
+        page_icon="",
         layout="wide",
         initial_sidebar_state="expanded"
     )
-    st.title("⚡ FRC Scouting Dashboard — REBUILT 2026")
+    st.title("FRC Scouting Dashboard — REBUILT 2026")
+    
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("✨ **Made by Thalia**")
 
     dash = ScoutingDashboard()
     tab1, tab2, tab3, tab4 = st.tabs([
-        "🎯 Pick List", "📊 Team Analysis", "🔮 Match Predictor", "📄 Raw Data"
+        "Pick List", "Team Analysis", "Match Predictor", "Raw Data"
     ])
     with tab1: dash.pick_list_formulation_tab()
     with tab2: dash.team_analysis_tab()

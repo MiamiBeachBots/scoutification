@@ -263,7 +263,7 @@
 </head>
 <body>
     <header>
-        <h1>🤖 FRC Scouting <span class="badge">Direct Submit</span></h1>
+        <h1> FRC Scouting <span class="badge">Direct Submit</span></h1>
         <p class="subtitle">WiFi mode — data goes straight to the server, no QR code needed</p>
     </header>
 
@@ -648,7 +648,7 @@
 
                 const result = await response.json();
                 this.showStatus(
-                    `✅ Saved! Match ${data.match_number}, Team ${data.team_number} (${data.alliance} alliance)`,
+                    ` Saved! Match ${data.match_number}, Team ${data.team_number} (${data.alliance} alliance)`,
                     'success'
                 );
 
@@ -661,7 +661,7 @@
                 }, 2000);
 
             } catch (error) {
-                this.showStatus(`❌ Error: ${error.message}`, 'error');
+                this.showStatus(` Error: ${error.message}`, 'error');
             } finally {
                 this.submitBtn.disabled = false;
             }
@@ -720,5 +720,9 @@
 
     document.addEventListener('DOMContentLoaded', () => new DirectSubmitApp());
     </script>
+    
+    <footer style="text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-color); color: var(--text-secondary);">
+        <p>Made by Thalia</p>
+    </footer>
 </body>
 </html>
