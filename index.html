@@ -114,6 +114,42 @@
             font-family: inherit;
         }
         
+        /* Tabs */
+        .tab-container {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background-color: var(--bg-secondary);
+        }
+        
+        .tab-btn.active {
+            color: var(--accent-secondary);
+            border-bottom: 3px solid var(--accent-secondary);
+        }
+        
+        .category-note {
+            color: var(--accent-warning, #FF9800);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+        
         /* Counter Controls */
         .counter-control {
             display: flex;

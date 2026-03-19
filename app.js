@@ -24,33 +24,85 @@ class ScoutingApp {
     }
     
     renderForm() {
+        this.form.innerHTML = ''; // clear
+        
+        // 1. Create Tab Buttons
+        const tabContainer = document.createElement('div');
+        tabContainer.className = 'tab-container';
+        
+        // 2. Create Tab Content Areas
+        const tabContents = {};
+        
+        CONFIG.tabs.forEach((tab, index) => {
+            // Tab Button
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
+            btn.textContent = tab.label;
+            btn.dataset.target = tab.id;
+            
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+                
+                e.target.classList.add('active');
+                document.getElementById(tab.id).style.display = 'block';
+                this.form.dataset.activeTab = tab.id; // Track which tab is active for submission
+            });
+            
+            tabContainer.appendChild(btn);
+            
+            // Tab Content Div
+            const content = document.createElement('div');
+            content.id = tab.id;
+            content.className = `tab-content`;
+            content.style.display = index === 0 ? 'block' : 'none';
+            tabContents[tab.id] = content;
+        });
+        
+        this.form.dataset.activeTab = CONFIG.tabs[0].id;
+        this.form.appendChild(tabContainer);
+        
         // Group fields by category
         const categorizedFields = {};
-        
         CONFIG.fields.forEach(field => {
-            if (!categorizedFields[field.category]) {
-                categorizedFields[field.category] = [];
-            }
+            if (!categorizedFields[field.category]) categorizedFields[field.category] = [];
             categorizedFields[field.category].push(field);
         });
         
-        // Render each category section
+        // Render each category section into the correct tab
         Object.keys(CONFIG.categories).forEach(categoryKey => {
             if (!categorizedFields[categoryKey]) return;
             
+            const categoryMeta = CONFIG.categories[categoryKey];
             const section = document.createElement('div');
             section.className = 'form-section';
             
             const heading = document.createElement('h2');
-            heading.textContent = CONFIG.categories[categoryKey];
+            heading.textContent = categoryMeta.label;
             section.appendChild(heading);
+            
+            // Optional warning note (e.g., photo limits)
+            if (categoryMeta.note) {
+                const note = document.createElement('p');
+                note.className = 'category-note';
+                note.textContent = categoryMeta.note;
+                section.appendChild(note);
+            }
             
             categorizedFields[categoryKey].forEach(field => {
                 const formGroup = this.createFormField(field);
                 section.appendChild(formGroup);
             });
             
-            this.form.appendChild(section);
+            // Append to the specific tab defined in config
+            if (tabContents[categoryMeta.tab]) {
+                tabContents[categoryMeta.tab].appendChild(section);
+            }
+        });
+        
+        Object.values(tabContents).forEach(content => {
+            this.form.appendChild(content);
         });
     }
     
@@ -80,6 +132,9 @@ class ScoutingApp {
                 break;
             case 'number':
                 input = this.createNumberInput(field);
+                break;
+            case 'file':
+                input = this.createFileInput(field);
                 break;
             case 'text':
             default:
@@ -230,6 +285,62 @@ class ScoutingApp {
         return input;
     }
     
+    createFileInput(field) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.id = field.id;
+        input.name = field.id;
+        if (field.accept) input.accept = field.accept;
+        
+        input.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) {
+                delete this.formData[field.id];
+                this.saveToLocalStorage();
+                return;
+            }
+            
+            // Downscale image to save space
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    const MAX_WIDTH = 600;
+                    const MAX_HEIGHT = 600;
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Compress as JPEG
+                    this.formData[field.id] = canvas.toDataURL('image/jpeg', 0.6);
+                    this.saveToLocalStorage();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        return input;
+    }
+    
     attachEventListeners() {
         this.submitBtn.addEventListener('click', () => this.handleSubmit());
         this.resetBtn.addEventListener('click', () => this.handleReset());
@@ -241,12 +352,20 @@ class ScoutingApp {
             timestamp: new Date().toISOString()
         };
         
+        const activeTab = this.form.dataset.activeTab;
+        
         CONFIG.fields.forEach(field => {
+            // Only collect fields for the active tab
+            const categoryMeta = CONFIG.categories[field.category];
+            if (!categoryMeta || categoryMeta.tab !== activeTab) return;
+            
             if (field.type === 'counter') {
                 data[field.id] = this.counterValues[field.id] || 0;
             } else if (field.type === 'checkbox') {
                 const checkbox = document.getElementById(field.id);
                 data[field.id] = checkbox ? checkbox.checked : false;
+            } else if (field.type === 'file') {
+                data[field.id] = this.formData[field.id] || '';
             } else {
                 const element = document.getElementById(field.id);
                 data[field.id] = element ? element.value : '';
@@ -258,8 +377,12 @@ class ScoutingApp {
     
     validateFormData(data) {
         const errors = [];
+        const activeTab = this.form.dataset.activeTab;
         
         CONFIG.fields.forEach(field => {
+            const categoryMeta = CONFIG.categories[field.category];
+            if (!categoryMeta || categoryMeta.tab !== activeTab) return;
+            
             if (field.required) {
                 const value = data[field.id];
                 if (value === '' || value === null || value === undefined) {
@@ -280,13 +403,21 @@ class ScoutingApp {
             return;
         }
         
+        // Remove base64 image data before generating QR code due to size limits
+        const qrData = { ...data };
+        CONFIG.fields.forEach(field => {
+            if (field.type === 'file') {
+                delete qrData[field.id];
+            }
+        });
+        
         // Compress data for QR code (remove whitespace)
-        const jsonString = JSON.stringify(data);
+        const jsonString = JSON.stringify(qrData);
         
         // Generate QR Code
-        this.generateQR(jsonString, data);
+        this.generateQR(jsonString, qrData);
         
-        // Save to history
+        // Save to history (save full data including photo)
         this.saveToHistory(data);
         
         this.showStatus('QR Code generated successfully!', 'success');
