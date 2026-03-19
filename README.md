@@ -2,7 +2,7 @@
 
 A complete, offline-capable scouting system for FIRST Robotics Competition (FRC) teams. This system allows scouts to collect match data on tablets/phones and transfer it via QR codes or web-based scanning to a central database.
 
-## 🎯 System Overview
+## System Overview
 
 ### Deployment Options
 
@@ -20,17 +20,17 @@ A complete, offline-capable scouting system for FIRST Robotics Competition (FRC)
 - See instructions below
 
 ### Key Features
-- ✅ **Multiple Deployment Options** - Docker or local
-- ✅ **Web-Based Scanner** - No desktop software needed
-- ✅ **100% Offline** - No internet required (after initial setup)
-- ✅ **Dark Mode UI** - Battery-efficient high-contrast design
-- ✅ **Configurable Fields** - Easy to customize for different seasons
-- ✅ **Local Backup** - Data saved to localStorage
-- ✅ **QR Code Transfer** - Reliable data transmission
-- ✅ **SQLite Database** - Persistent storage with SQL queries
-- ✅ **RESTful API** - Modern web architecture
+-  **Multiple Deployment Options** - Docker or local
+-  **Web-Based Scanner** - No desktop software needed
+-  **100% Offline** - No internet required (after initial setup)
+-  **Dark Mode UI** - Battery-efficient high-contrast design
+-  **Configurable Fields** - Easy to customize for different seasons
+-  **Local Backup** - Data saved to localStorage
+-  **QR Code Transfer** - Reliable data transmission
+-  **SQLite Database** - Persistent storage with SQL queries
+-  **RESTful API** - Modern web architecture
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Docker Deployment (Recommended)
 
@@ -49,11 +49,11 @@ docker compose up -d
 # - API: http://localhost:8000
 ```
 
-📖 **Full Docker documentation:** [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
+ **Full Docker documentation:** [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
 
 ### Local Deployment (Original)
 
-## 📋 Requirements (Local Deployment)
+## Requirements (Local Deployment)
 
 ### Frontend (Scouting App)
 - Any modern web browser (Chrome, Firefox, Safari, Edge)
@@ -91,7 +91,7 @@ brew install zbar
 - Usually works out of the box with `pip install pyzbar`
 - If issues occur, download zbar DLL from: http://zbar.sourceforge.net/
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Setup the Frontend (Scouting App)
 
@@ -166,7 +166,7 @@ The desktop scanner will:
 - Open your webcam
 - Wait for QR codes to scan
 
-## 📱 Usage Guide
+## Usage Guide
 
 ### Scouting Workflow
 
@@ -217,7 +217,7 @@ The desktop scanner will:
 2. Form resets for next match
 3. Previous entries are preserved in history
 
-## 🔧 Customization
+## Customization
 
 ### Modifying Scouting Fields
 
@@ -256,7 +256,7 @@ const CONFIG = {
 - **text**: Short text input
 - **textarea**: Multi-line text input
 
-## 📊 Data Analysis
+## Data Analysis
 
 ### Accessing the Database
 
@@ -314,13 +314,12 @@ This tool will:
 pip install pandas
 ```
 
-## 🗂️ File Structure
+## File Structure
 
 ```
 scoutification/
-├── index.html                   # Main scouting interface
-├── pit.html                     # Pit scouting interface
-├── scanner.html                 # Web-based QR scanner (NEW)
+├── index.html                   # Main scouting interface (Pre-Scout & Match tabs)
+├── scanner.html                 # Web-based QR scanner
 ├── app.js                       # Frontend application logic
 ├── config.js                    # Field configuration
 ├── qrcode.min.js                # QR code generation library
@@ -346,7 +345,7 @@ scoutification/
 └── scouting_data.db             # SQLite database (created on first run)
 ```
 
-## 🔒 Data Backup
+##  Data Backup
 
 ### Automatic Backups
 - Frontend: Data saved to browser localStorage
@@ -361,7 +360,7 @@ cp scouting_data.db scouting_data_backup_$(date +%Y%m%d).db
 sqlite3 scouting_data.db ".backup scouting_data_backup.db"
 ```
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Frontend Issues
 
@@ -397,29 +396,29 @@ python3 -c "import cv2; cap = cv2.VideoCapture(0); print('Success' if cap.isOpen
 - Ensure `scouting_data.db` is not locked by another program
 - Try deleting database and letting it recreate
 
-## 📝 Notes
+## Notes
 
-- The system uses FRC 2022 Rapid React game fields as examples
+- The system natively supports the **FRC 2026 REBUILT** game with an advanced, unified tabbed UI for Pre-Scouting and Match performance.
 - Customize `config.js` for your specific season/game
 - QR codes can store approximately 2-3 KB of data
 - For best results, use tablets with 7" or larger screens
 - Recommended: 1 tablet per 6 scouts, 1 master station per event
 
-## 🤝 Contributing
+##  Contributing
 
 To add new features or fix bugs:
 1. Modify the appropriate files
 2. Test thoroughly with sample data
 3. Update this README if needed
 
-## 📄 License
+##  License
 
 This project is intended for FRC teams and educational use.
 
-## 🏆 Credits
+## Credits
 
-Built for FRC teams to make scouting easier and more reliable.
+Built for FRC teams to make scouting easier and more reliable. Made by Thalia.
 
 ---
 
-**Good luck with your scouting! 🤖**
+**Good luck with your scouting!**

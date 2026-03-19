@@ -1,4 +1,4 @@
-# 🖥️ Middleman (Scanner Laptop) Instructions
+# ️ Middleman (Scanner Laptop) Instructions
 
 You are running the **QR code scanner station**. Your job is to scan QR codes that scouters hold up on their phones and push the data to the server automatically.
 
@@ -35,22 +35,22 @@ When the browser asks for camera permission, tap **Allow**. The scanner will ope
 1. A scouter holds their phone with a QR code up to your camera
 2. Point the camera at the QR code — it scans automatically, no button needed
 3. You'll see a **green flash** and a toast notification like:
-   - ✓ Match 4, Team 1234
-   - ✓ Pit Data: Team 5678
+   -  Match 4, Team 1234
+   -  Pit Data: Team 5678
 4. The scanner is ready for the next one immediately
 
 ### What the status bar means
 
 | Status | Meaning |
 |---|---|
-| 🔵 Ready to scan... | Good, camera is on |
-| 🟢 ✓ Match X, Team Y | Data saved to server |
-| 🔴 API Error | Server unreachable, see troubleshooting |
+|  Ready to scan... | Good, camera is on |
+|   Match X, Team Y | Data saved to server |
+|  API Error | Server unreachable, see troubleshooting |
 
 ### Counters at the bottom
 - **Scanned** — total QR codes detected
-- **Success** — data saved to server ✅
-- **Errors** — failed submissions ❌
+- **Success** — data saved to server 
+- **Errors** — failed submissions 
 
 ---
 

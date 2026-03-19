@@ -16,6 +16,7 @@ RUN pip install --no-cache-dir -r requirements-backend.txt
 
 # Copy application code
 COPY api.py .
+COPY schema.sql .
 
 # Create data directory
 RUN mkdir -p /data

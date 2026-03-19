@@ -129,52 +129,16 @@ class PreScoutingData(BaseModel):
 def init_database():
     db_path = get_db_path()
     conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
 
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS scouting_data (
-            id           INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp    TEXT NOT NULL,
-            scanned_at   TEXT NOT NULL,
-
-            match_number  INTEGER NOT NULL,
-            team_number   INTEGER NOT NULL,
-            alliance      TEXT NOT NULL CHECK(alliance IN ('Red','Blue')),
-            scouter_name  TEXT NOT NULL,
-
-            pre_loaded_fuel INTEGER DEFAULT 0,
-
-            auto_fuel_active_hub INTEGER DEFAULT 0,
-            auto_tower_level1    INTEGER DEFAULT 0,
-
-            teleop_fuel_active_hub   INTEGER DEFAULT 0,
-            teleop_fuel_inactive_hub INTEGER DEFAULT 0,
-            fuel_collection_source   TEXT DEFAULT '',
-
-            max_tower_level TEXT DEFAULT 'None',
-            minor_fouls     INTEGER DEFAULT 0,
-            major_fouls     INTEGER DEFAULT 0,
-
-            energized_rp    INTEGER DEFAULT 0,
-            supercharged_rp INTEGER DEFAULT 0,
-            traversal_rp    INTEGER DEFAULT 0,
-
-            UNIQUE(match_number, team_number, alliance)
-        )
-    ''')
-
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS pit_data (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            team_number          INTEGER NOT NULL UNIQUE,
-            robot_weight         REAL    NOT NULL,
-            drivetrain_type      TEXT    NOT NULL,
-            intake_type          TEXT    NOT NULL,
-            programming_language TEXT    NOT NULL,
-            robot_thumbnail      BLOB,
-            scanned_at           TEXT    NOT NULL
-        )
-    ''')
+    schema_path = os.path.join(os.path.dirname(__file__), 'schema.sql')
+    if os.path.exists(schema_path):
+        with open(schema_path, 'r') as f:
+            try:
+                conn.executescript(f.read())
+            except sqlite3.Error as e:
+                print(f"Schema execution warning: {e}")
+    else:
+        print("Warning: schema.sql not found! Database may not initialize properly.")
 
     conn.commit()
     conn.close()
