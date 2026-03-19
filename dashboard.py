@@ -87,7 +87,11 @@ class ScoutingDashboard:
                     ELSE 0
                 END AS tower_level_num,
                 minor_fouls,
-                major_fouls
+                major_fouls,
+                shooter_cadence,
+                shooter_accuracy,
+                defensive_phase_summary,
+                robot_photo
             FROM scouting_data
             WHERE team_number = ?
             ORDER BY match_number
@@ -97,6 +101,15 @@ class ScoutingDashboard:
             return df
         except Exception as e:
             st.error(f"Error loading team data: {e}")
+            return pd.DataFrame()
+
+    def load_pre_scouting_data(self):
+        try:
+            conn = sqlite3.connect(self.db_path)
+            df = pd.read_sql_query("SELECT * FROM pre_scouting_data", conn)
+            conn.close()
+            return df
+        except Exception:
             return pd.DataFrame()
 
     # ──────────────────────────────────────────────────────────────
@@ -206,8 +219,38 @@ class ScoutingDashboard:
         c8.metric("Traversal RP%",       f"{stats['Traversal_Rate']*100:.0f}%")
 
         st.markdown("---")
+        
+        # Load Pre-scouting data
+        pre_scout_df = self.load_pre_scouting_data()
+        pre_stats = None
+        if not pre_scout_df.empty and team in pre_scout_df['team_number'].values:
+            pre_stats = pre_scout_df[pre_scout_df['team_number'] == team].iloc[0]
 
         match_data = self.load_team_match_data(team)
+        
+        st.subheader("🛠️ Hardware & Strategy (Pre-Scouting & Latest Match)")
+        p1, p2, p3 = st.columns(3)
+        if pre_stats is not None:
+            p1.metric("Drive System", pre_stats.get('drive_system', 'N/A'))
+            p2.metric("Has Turret", pre_stats.get('has_turret', 'N/A'))
+            fuel_cap = pre_stats.get('fuel_capacity', '0')
+            if pd.isna(fuel_cap): fuel_cap = 0
+            p3.metric("FUEL Capacity", f"{int(fuel_cap)}")
+        else:
+            p1.info("No Pre-Scouting data available.")
+        
+        if not match_data.empty:
+            latest_match = match_data.iloc[-1]
+            p4, p5, p6 = st.columns(3)
+            p4.metric("Shooter Cadence (Latest)", latest_match.get('shooter_cadence', 'N/A'))
+            p5.metric("Shooter Accuracy (Latest)", latest_match.get('shooter_accuracy', 'N/A'))
+            p6.metric("Defensive Phase (Latest)", latest_match.get('defensive_phase_summary', 'N/A'))
+
+        if pre_stats is not None and pre_stats.get('robot_photo') is not None:
+            photo_bytes = pre_stats['robot_photo']
+            if isinstance(photo_bytes, bytes):
+                st.image(photo_bytes, caption=f"Team {team} Robot (Pit Photo)", use_container_width=True)
+
         if not match_data.empty:
             st.subheader("📈 FUEL Scored Per Match")
             melted = match_data[['match_number', 'auto_fuel_active_hub',
