@@ -27,6 +27,11 @@ CREATE TABLE IF NOT EXISTS scouting_data (
     teleop_fuel_inactive_hub INTEGER DEFAULT 0,
     fuel_collection_source   TEXT CHECK(fuel_collection_source IN ('Depot', 'Neutral Zone', 'Outpost', '')),
 
+    -- Advanced Performance
+    shooter_cadence         TEXT DEFAULT 'N/A',
+    shooter_accuracy        TEXT DEFAULT 'N/A',
+    defensive_phase_summary TEXT DEFAULT 'No Defense Played',
+
     -- End Game
     max_tower_level TEXT DEFAULT 'None' CHECK(max_tower_level IN ('None', 'Level 1', 'Level 2', 'Level 3')),
     minor_fouls     INTEGER DEFAULT 0,
@@ -36,6 +41,9 @@ CREATE TABLE IF NOT EXISTS scouting_data (
     energized_rp    INTEGER DEFAULT 0 CHECK(energized_rp    IN (0, 1)),
     supercharged_rp INTEGER DEFAULT 0 CHECK(supercharged_rp IN (0, 1)),
     traversal_rp    INTEGER DEFAULT 0 CHECK(traversal_rp    IN (0, 1)),
+    
+    -- Match Photo
+    robot_photo     BLOB,
 
     -- Unique constraint: one entry per team per match per alliance
     UNIQUE(match_number, team_number, alliance)
@@ -74,17 +82,22 @@ SELECT
 FROM scouting_data
 GROUP BY team_number;
 
--- Pit scouting data table (unchanged — robot hardware doesn't change per game)
-CREATE TABLE IF NOT EXISTS pit_data (
+-- Pre-scouting data table
+CREATE TABLE IF NOT EXISTS pre_scouting_data (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
 
+    -- Metadata
+    timestamp  TEXT NOT NULL,
+    scanned_at TEXT NOT NULL,
+
     team_number        INTEGER NOT NULL UNIQUE,
-    robot_weight       REAL    NOT NULL,
-    drivetrain_type    TEXT    NOT NULL CHECK(drivetrain_type    IN ('Swerve', 'Tank', 'Mecanum')),
-    intake_type        TEXT    NOT NULL CHECK(intake_type        IN ('Over-bumper', 'Through-bumper')),
-    programming_language TEXT  NOT NULL CHECK(programming_language IN ('Java', 'C++', 'Python', 'LabVIEW')),
-    robot_thumbnail    BLOB,
-    scanned_at         TEXT    NOT NULL
+    scouter_name       TEXT NOT NULL,
+    
+    drive_system       TEXT,
+    has_turret         TEXT,
+    fuel_capacity      INTEGER DEFAULT 0,
+    
+    robot_photo        BLOB
 );
 
-CREATE INDEX IF NOT EXISTS idx_pit_team_number ON pit_data(team_number);
+CREATE INDEX IF NOT EXISTS idx_pre_team_number ON pre_scouting_data(team_number);

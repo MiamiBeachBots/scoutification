@@ -61,6 +61,11 @@ class ScoutingData(BaseModel):
     teleop_fuel_inactive_hub: Optional[int] = 0
     fuel_collection_source:   Optional[str] = ""
 
+    # Advanced Performance
+    shooter_cadence:         Optional[str] = "N/A"
+    shooter_accuracy:        Optional[str] = "N/A"
+    defensive_phase_summary: Optional[str] = "No Defense Played"
+
     # End game
     max_tower_level: Optional[str] = "None"
     minor_fouls:     Optional[int] = 0
@@ -70,6 +75,8 @@ class ScoutingData(BaseModel):
     energized_rp:    Optional[bool] = False
     supercharged_rp: Optional[bool] = False
     traversal_rp:    Optional[bool] = False
+
+    robot_photo_match: Optional[str] = None
 
     @validator('alliance')
     def validate_alliance(cls, v):
@@ -96,31 +103,22 @@ class ScoutingData(BaseModel):
         return v or 'None'
 
 
-class PitData(BaseModel):
-    """Pit scouting data (abbreviated keys for QR compactness)"""
-    t:   int    # team_number
-    w:   float  # robot_weight
-    d:   str    # drivetrain_type
-    i:   str    # intake_type
-    p:   str    # programming_language
-    img: Optional[str] = None  # base64 robot photo
+class PreScoutingData(BaseModel):
+    """Pre-scouting (pit) data from the new tabbed UI"""
+    timestamp: Optional[str] = None
+    pre_team_number:  int
+    pre_scouter_name: str
+    
+    drive_system:  Optional[str] = ""
+    has_turret:    Optional[str] = ""
+    fuel_capacity: Optional[int] = 0
+    
+    robot_photo_pre: Optional[str] = None
 
-    @validator('d')
+    @validator('drive_system')
     def validate_drivetrain(cls, v):
-        if v not in ('Swerve', 'Tank', 'Mecanum'):
-            raise ValueError(f"Invalid drivetrain_type: {v}")
-        return v
-
-    @validator('i')
-    def validate_intake(cls, v):
-        if v not in ('Over-bumper', 'Through-bumper'):
-            raise ValueError(f"Invalid intake_type: {v}")
-        return v
-
-    @validator('p')
-    def validate_programming(cls, v):
-        if v not in ('Java', 'C++', 'Python', 'LabVIEW'):
-            raise ValueError(f"Invalid programming_language: {v}")
+        if v not in ('Swerve', 'Tank', 'Mecanum', ''):
+            raise ValueError(f"Invalid drive_system: {v}")
         return v
 
 
@@ -207,11 +205,11 @@ async def root():
 @app.post("/api/submit")
 async def submit_data(data: dict[str, Any]):
     try:
-        is_pit = 't' in data and 'w' in data and 'd' in data
-        if is_pit:
-            pit = PitData(**data)
-            result = save_pit_data(pit)
-            return {"status": "success", "message": f"Pit data saved for Team {pit.t}", "data": result}
+        is_pre_scout = 'pre_team_number' in data
+        if is_pre_scout:
+            pit = PreScoutingData(**data)
+            result = save_pre_scouting_data(pit)
+            return {"status": "success", "message": f"Pre-scouting data saved for Team {pit.pre_team_number}", "data": result}
         else:
             match = ScoutingData(**data)
             result = save_match_data(match)
@@ -225,6 +223,17 @@ async def submit_data(data: dict[str, Any]):
 
 def save_match_data(data: ScoutingData) -> dict:
     scanned_at = datetime.now().isoformat()
+    match_photo_blob = None
+    if data.robot_photo_match:
+        try:
+            # format could be "data:image/jpeg;base64,/9j/4..."
+            if ',' in data.robot_photo_match:
+                match_photo_blob = base64.b64decode(data.robot_photo_match.split(',')[1])
+            else:
+                match_photo_blob = base64.b64decode(data.robot_photo_match)
+        except Exception as e:
+            print(f"Warning: failed to decode match photo: {e}")
+
     rec = {
         'timestamp':    data.timestamp or scanned_at,
         'scanned_at':   scanned_at,
@@ -242,6 +251,10 @@ def save_match_data(data: ScoutingData) -> dict:
         'teleop_fuel_inactive_hub': data.teleop_fuel_inactive_hub or 0,
         'fuel_collection_source':   data.fuel_collection_source or '',
 
+        'shooter_cadence':         data.shooter_cadence or 'N/A',
+        'shooter_accuracy':        data.shooter_accuracy or 'N/A',
+        'defensive_phase_summary': data.defensive_phase_summary or 'No Defense Played',
+
         'max_tower_level': data.max_tower_level or 'None',
         'minor_fouls':     data.minor_fouls or 0,
         'major_fouls':     data.major_fouls or 0,
@@ -249,6 +262,8 @@ def save_match_data(data: ScoutingData) -> dict:
         'energized_rp':    1 if data.energized_rp    else 0,
         'supercharged_rp': 1 if data.supercharged_rp else 0,
         'traversal_rp':    1 if data.traversal_rp    else 0,
+        
+        'robot_photo':     match_photo_blob
     }
 
     try:
@@ -260,16 +275,18 @@ def save_match_data(data: ScoutingData) -> dict:
                 pre_loaded_fuel,
                 auto_fuel_active_hub, auto_tower_level1,
                 teleop_fuel_active_hub, teleop_fuel_inactive_hub, fuel_collection_source,
+                shooter_cadence, shooter_accuracy, defensive_phase_summary,
                 max_tower_level, minor_fouls, major_fouls,
-                energized_rp, supercharged_rp, traversal_rp
+                energized_rp, supercharged_rp, traversal_rp, robot_photo
             ) VALUES (
                 :timestamp, :scanned_at,
                 :match_number, :team_number, :alliance, :scouter_name,
                 :pre_loaded_fuel,
                 :auto_fuel_active_hub, :auto_tower_level1,
                 :teleop_fuel_active_hub, :teleop_fuel_inactive_hub, :fuel_collection_source,
+                :shooter_cadence, :shooter_accuracy, :defensive_phase_summary,
                 :max_tower_level, :minor_fouls, :major_fouls,
-                :energized_rp, :supercharged_rp, :traversal_rp
+                :energized_rp, :supercharged_rp, :traversal_rp, :robot_photo
             )
         ''', rec)
         conn.commit()
@@ -279,26 +296,36 @@ def save_match_data(data: ScoutingData) -> dict:
         raise Exception(f"Database error: {e}")
 
 
-def save_pit_data(data: PitData) -> dict:
+def save_pre_scouting_data(data: PreScoutingData) -> dict:
     scanned_at = datetime.now().isoformat()
-    thumbnail_blob = None
-    if data.img:
+    pre_photo_blob = None
+    if data.robot_photo_pre:
         try:
-            thumbnail_blob = base64.b64decode(data.img)
+            if ',' in data.robot_photo_pre:
+                pre_photo_blob = base64.b64decode(data.robot_photo_pre.split(',')[1])
+            else:
+                pre_photo_blob = base64.b64decode(data.robot_photo_pre)
         except Exception as e:
-            print(f"Warning: failed to decode image: {e}")
+            print(f"Warning: failed to decode pre_scouting photo: {e}")
 
     try:
         conn = sqlite3.connect(get_db_path())
         conn.execute('''
-            INSERT OR REPLACE INTO pit_data (
-                team_number, robot_weight, drivetrain_type,
-                intake_type, programming_language, robot_thumbnail, scanned_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (data.t, data.w, data.d, data.i, data.p, thumbnail_blob, scanned_at))
+            INSERT OR REPLACE INTO pre_scouting_data (
+                timestamp, scanned_at,
+                team_number, scouter_name,
+                drive_system, has_turret, fuel_capacity,
+                robot_photo
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            data.timestamp or scanned_at, scanned_at,
+            data.pre_team_number, data.pre_scouter_name.strip().lower(),
+            data.drive_system, data.has_turret, data.fuel_capacity,
+            pre_photo_blob
+        ))
         conn.commit()
         conn.close()
-        return {"team_number": data.t}
+        return {"team_number": data.pre_team_number}
     except sqlite3.Error as e:
         raise Exception(f"Database error: {e}")
 
