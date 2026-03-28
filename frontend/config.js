@@ -57,6 +57,13 @@ const CONFIG = {
       category: "robot_hardware"
     },
     {
+      id: "can_traverse_trench",
+      label: "Can it traverse under the TRENCH?",
+      type: "dropdown",
+      options: ["Yes", "No"],
+      category: "robot_hardware"
+    },
+    {
       id: "fuel_capacity",
       label: "FUEL Capacity (How many can it hold?)",
       type: "number",
@@ -157,6 +164,13 @@ const CONFIG = {
     },
 
     // ── Advanced Performance
+    {
+      id: "preferred_traversal",
+      label: "Preferred Field Traversal",
+      type: "dropdown",
+      options: ["Bump", "Trench", "Both", "Neither"],
+      category: "performance"
+    },
     {
       id: "shooter_cadence",
       label: "Shooter Cadence (Speed)",

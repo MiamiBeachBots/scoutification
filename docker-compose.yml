@@ -9,15 +9,7 @@ services:
       - "10081:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./index.html:/usr/share/nginx/html/index.html:ro
-      - ./pit.html:/usr/share/nginx/html/pit.html:ro
-      - ./scanner.html:/usr/share/nginx/html/scanner.html:ro
-      - ./submit.html:/usr/share/nginx/html/submit.html:ro
-      - ./app.js:/usr/share/nginx/html/app.js:ro
-      - ./config.js:/usr/share/nginx/html/config.js:ro
-      - ./qrcode.min.js:/usr/share/nginx/html/qrcode.min.js:ro
-      - ./html5-qrcode.min.js:/usr/share/nginx/html/html5-qrcode.min.js:ro
-      - ./manifest.json:/usr/share/nginx/html/manifest.json:ro
+      - ./frontend:/usr/share/nginx/html:ro
     networks:
       - homelab-net
     restart: unless-stopped
@@ -25,8 +17,8 @@ services:
   # Backend - FastAPI
   backend:
     build:
-      context: .
-      dockerfile: Dockerfile.backend
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: frc-scout-backend
     ports:
       - "10082:8000"
@@ -46,8 +38,8 @@ services:
   # Dashboard - Streamlit
   dashboard:
     build:
-      context: .
-      dockerfile: Dockerfile.dashboard
+      context: ./dashboard
+      dockerfile: Dockerfile
     container_name: frc-scout-dashboard
     ports:
       - "10083:8501"

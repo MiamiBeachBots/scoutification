@@ -62,6 +62,7 @@ class ScoutingData(BaseModel):
     fuel_collection_source:   Optional[str] = ""
 
     # Advanced Performance
+    preferred_traversal:     Optional[str] = "Neither"
     shooter_cadence:         Optional[str] = "N/A"
     shooter_accuracy:        Optional[str] = "N/A"
     defensive_phase_summary: Optional[str] = "No Defense Played"
@@ -111,6 +112,7 @@ class PreScoutingData(BaseModel):
     
     drive_system:  Optional[str] = ""
     has_turret:    Optional[str] = ""
+    can_traverse_trench: Optional[str] = ""
     fuel_capacity: Optional[int] = 0
     
     robot_photo_pre: Optional[str] = None
@@ -215,6 +217,7 @@ def save_match_data(data: ScoutingData) -> dict:
         'teleop_fuel_inactive_hub': data.teleop_fuel_inactive_hub or 0,
         'fuel_collection_source':   data.fuel_collection_source or '',
 
+        'preferred_traversal':     data.preferred_traversal or 'Neither',
         'shooter_cadence':         data.shooter_cadence or 'N/A',
         'shooter_accuracy':        data.shooter_accuracy or 'N/A',
         'defensive_phase_summary': data.defensive_phase_summary or 'No Defense Played',
@@ -239,7 +242,7 @@ def save_match_data(data: ScoutingData) -> dict:
                 pre_loaded_fuel,
                 auto_fuel_active_hub, auto_tower_level1,
                 teleop_fuel_active_hub, teleop_fuel_inactive_hub, fuel_collection_source,
-                shooter_cadence, shooter_accuracy, defensive_phase_summary,
+                preferred_traversal, shooter_cadence, shooter_accuracy, defensive_phase_summary,
                 max_tower_level, minor_fouls, major_fouls,
                 energized_rp, supercharged_rp, traversal_rp, robot_photo
             ) VALUES (
@@ -248,7 +251,7 @@ def save_match_data(data: ScoutingData) -> dict:
                 :pre_loaded_fuel,
                 :auto_fuel_active_hub, :auto_tower_level1,
                 :teleop_fuel_active_hub, :teleop_fuel_inactive_hub, :fuel_collection_source,
-                :shooter_cadence, :shooter_accuracy, :defensive_phase_summary,
+                :preferred_traversal, :shooter_cadence, :shooter_accuracy, :defensive_phase_summary,
                 :max_tower_level, :minor_fouls, :major_fouls,
                 :energized_rp, :supercharged_rp, :traversal_rp, :robot_photo
             )
@@ -278,13 +281,13 @@ def save_pre_scouting_data(data: PreScoutingData) -> dict:
             INSERT OR REPLACE INTO pre_scouting_data (
                 timestamp, scanned_at,
                 team_number, scouter_name,
-                drive_system, has_turret, fuel_capacity,
+                drive_system, has_turret, can_traverse_trench, fuel_capacity,
                 robot_photo
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             data.timestamp or scanned_at, scanned_at,
             data.pre_team_number, data.pre_scouter_name.strip().lower(),
-            data.drive_system, data.has_turret, data.fuel_capacity,
+            data.drive_system, data.has_turret, data.can_traverse_trench, data.fuel_capacity,
             pre_photo_blob
         ))
         conn.commit()

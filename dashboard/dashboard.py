@@ -9,6 +9,7 @@ import pandas as pd
 import sqlite3
 import altair as alt
 import os
+import requests
 
 
 class ScoutingDashboard:
@@ -406,6 +407,86 @@ class ScoutingDashboard:
                          "traversal_rp":             st.column_config.NumberColumn("Traversal"),
                      })
 
+    # ──────────────────────────────────────────────────────────────
+    # Match Preview (TBA & Statbotics)
+    # ──────────────────────────────────────────────────────────────
+
+    def match_preview_tab(self):
+        st.header(" Match Preview & Strategy")
+        st.markdown("Fetch upcoming matches from The Blue Alliance to view EPAs and Scouting Data.")
+        
+        c1, c2, c3 = st.columns(3)
+        tba_key = c1.text_input("TBA Event Key (e.g., 2026txhou)", value="2026txhou")
+        match_num = c2.number_input("Qual Match Number", min_value=1, value=1)
+        api_key = c3.text_input("TBA API Key (Optional for cached)", type="password", help="Get from thebluealliance.com/account")
+        
+        if st.button("Load Preview", type="primary"):
+            if not tba_key:
+                st.error("Event key is required.")
+                return
+                
+            with st.spinner("Fetching TBA and Statbotics data..."):
+                headers = {"X-TBA-Auth-Key": api_key} if api_key else {}
+                url = f"https://www.thebluealliance.com/api/v3/match/{tba_key}_qm{match_num}"
+                
+                red_teams = []
+                blue_teams = []
+                
+                try:
+                    resp = requests.get(url, headers=headers, timeout=3)
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        red_teams = [int(t.replace('frc','')) for t in data['alliances']['red']['team_keys']]
+                        blue_teams = [int(t.replace('frc','')) for t in data['alliances']['blue']['team_keys']]
+                    else:
+                        st.warning(f"TBA sync failed (Status {resp.status_code}). Please enter teams manually if needed.")
+                except Exception as e:
+                    st.warning(f"TBA connection error: {e}")
+                    
+                if not red_teams or not blue_teams:
+                    st.info("Loading dummy teams for preview since TBA failed (e.g. no API key).")
+                    red_teams = [254, 1678, 1323]
+                    blue_teams = [2056, 118, 148]
+                    
+                self._render_match_preview(red_teams, blue_teams)
+
+    def _render_match_preview(self, red_teams, blue_teams):
+        st.markdown("---")
+        df = self.load_data()
+        pre_df = self.load_pre_scouting_data()
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.error("🟥 RED ALLIANCE")
+            for t in red_teams:
+                st.markdown(f"<div style='background-color:#4a1212;padding:12px;border-radius:8px;border-left:6px solid #ff4444;color:white;margin-bottom:12px;font-size:1.1em;'>{self._html_card(t, df, pre_df)}</div>", unsafe_allow_html=True)
+                
+        with col2:
+            st.info("🟦 BLUE ALLIANCE")
+            for t in blue_teams:
+                st.markdown(f"<div style='background-color:#121a4a;padding:12px;border-radius:8px;border-left:6px solid #4444ff;color:white;margin-bottom:12px;font-size:1.1em;'>{self._html_card(t, df, pre_df)}</div>", unsafe_allow_html=True)
+
+    def _html_card(self, t, df, pre_df):
+        epa = "N/A"
+        try:
+            # Try Statbotics v2 which is very stable: /v2/team_year/TEAM/YEAR
+            res = requests.get(f"https://api.statbotics.io/v2/team_year/{t}/2026", timeout=2)
+            if res.status_code == 200:
+                epa = round(res.json().get('epa_end', 0), 1)
+        except Exception:
+            pass
+            
+        scout = df[df['team_number'] == t].iloc[0] if (not df.empty and t in df['team_number'].values) else None
+        pit = pre_df[pre_df['team_number'] == t].iloc[0] if (not pre_df.empty and t in pre_df['team_number'].values) else None
+        
+        drive = pit['drive_system'] if pit is not None and not pd.isna(pit['drive_system']) else '?'
+        trench = pit['can_traverse_trench'] if pit is not None and not pd.isna(pit['can_traverse_trench']) else '?'
+        
+        avg_hub = f"{scout['Avg_Total_Active_Hub']:.1f}" if scout is not None else '?'
+        avg_twr = f"{scout['Avg_Tower_Level']:.1f}" if scout is not None else '?'
+        
+        return f"<b style='font-size:1.3em;'>Team {t}</b> <span style='float:right;color:#aaa;'>EPA: {epa}</span><br><br><b>Avg Scored:</b> {avg_hub} HUB | Tower Lvl {avg_twr}<br><b>Drive:</b> {drive} | <b>Under Trench:</b> {trench}"
+
 
 def main():
     st.set_page_config(
@@ -420,13 +501,14 @@ def main():
     st.sidebar.markdown("✨ **Made by Thalia**")
 
     dash = ScoutingDashboard()
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "Pick List", "Team Analysis", "Match Predictor", "Raw Data"
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "Pick List", "Team Analysis", "Match Predictor", "Match Preview", "Raw Data"
     ])
     with tab1: dash.pick_list_formulation_tab()
     with tab2: dash.team_analysis_tab()
     with tab3: dash.match_predictor_tab()
-    with tab4: dash.raw_data_tab()
+    with tab4: dash.match_preview_tab()
+    with tab5: dash.raw_data_tab()
 
 
 if __name__ == '__main__':

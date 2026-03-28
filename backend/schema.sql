@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS scouting_data (
     fuel_collection_source   TEXT CHECK(fuel_collection_source IN ('Depot', 'Neutral Zone', 'Outpost', '')),
 
     -- Advanced Performance
+    preferred_traversal     TEXT DEFAULT 'Neither',
     shooter_cadence         TEXT DEFAULT 'N/A',
     shooter_accuracy        TEXT DEFAULT 'N/A',
     defensive_phase_summary TEXT DEFAULT 'No Defense Played',
@@ -95,6 +96,7 @@ CREATE TABLE IF NOT EXISTS pre_scouting_data (
     
     drive_system       TEXT,
     has_turret         TEXT,
+    can_traverse_trench TEXT,
     fuel_capacity      INTEGER DEFAULT 0,
     
     robot_photo        BLOB
