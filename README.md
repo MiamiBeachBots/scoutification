@@ -247,6 +247,17 @@ const CONFIG = {
 1. `scanner.py` - Update `expected_keys` and database save logic
 2. `schema.sql` - Update table schema
 
+### Cache Busting (Cloudflare & Browsers)
+
+If you modify `config.js` or `app.js` during an event, scouters' devices or CDNs (like Cloudflare) may aggressively cache the old files. To force everyone to download the latest updates, you must **bump the version string** in the HTML files.
+
+In `index.html`, `submit.html`, and `scanner.html`, locate the script tags at the bottom:
+```html
+<script src="config.js?v=2026c"></script>
+<script src="app.js?v=2026c"></script>
+```
+Update the `?v=` parameter (e.g., from `2026c` to `2026d`). The project's versioning scheme is `[YEAR][letter]` (e.g., `2026a`, `2026b`, `2026c`). Once you change this and deploy, all clients will instantly fetch the new code!
+
 ### Field Types
 
 - **counter**: Large +/- buttons for counting (e.g., balls scored)
