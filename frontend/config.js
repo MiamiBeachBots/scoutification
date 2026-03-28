@@ -20,8 +20,7 @@ const CONFIG = {
     teleop: { label: "Teleoperated (TELEOP)", tab: "tab_match_scouting" },
     performance: { label: "Advanced Performance Analytics", tab: "tab_match_scouting" },
     endgame: { label: "End Game & Fouls", tab: "tab_match_scouting" },
-    alliance_rp: { label: "Alliance Ranking Points", tab: "tab_match_scouting" },
-    match_photo: { label: "Match Photo", tab: "tab_match_scouting", note: "Photos will NOT be sent via QR code due to size limits. Use WiFi submission." }
+    alliance_rp: { label: "Alliance Ranking Points", tab: "tab_match_scouting" }
   },
 
   fields: [
@@ -61,6 +60,13 @@ const CONFIG = {
       label: "Can it traverse under the TRENCH?",
       type: "dropdown",
       options: ["Yes", "No"],
+      category: "robot_hardware"
+    },
+    {
+      id: "preferred_traversal",
+      label: "Preferred Field Traversal",
+      type: "dropdown",
+      options: ["Bump", "Trench", "Both", "Neither"],
       category: "robot_hardware"
     },
     {
@@ -236,13 +242,6 @@ const CONFIG = {
       label: "Do you expect TRAVERSAL RP? (alliance earns 50+ Tower Points)",
       type: "checkbox",
       category: "alliance_rp"
-    },
-    {
-      id: "robot_photo_match",
-      label: "Take Match Photo (Optional)",
-      type: "file",
-      accept: "image/*",
-      category: "match_photo"
     }
   ]
 };

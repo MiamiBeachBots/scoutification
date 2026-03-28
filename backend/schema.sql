@@ -97,6 +97,7 @@ CREATE TABLE IF NOT EXISTS pre_scouting_data (
     drive_system       TEXT,
     has_turret         TEXT,
     can_traverse_trench TEXT,
+    preferred_traversal TEXT,
     fuel_capacity      INTEGER DEFAULT 0,
     
     robot_photo        BLOB

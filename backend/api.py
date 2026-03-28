@@ -113,6 +113,7 @@ class PreScoutingData(BaseModel):
     drive_system:  Optional[str] = ""
     has_turret:    Optional[str] = ""
     can_traverse_trench: Optional[str] = ""
+    preferred_traversal: Optional[str] = ""
     fuel_capacity: Optional[int] = 0
     
     robot_photo_pre: Optional[str] = None
@@ -281,13 +282,13 @@ def save_pre_scouting_data(data: PreScoutingData) -> dict:
             INSERT OR REPLACE INTO pre_scouting_data (
                 timestamp, scanned_at,
                 team_number, scouter_name,
-                drive_system, has_turret, can_traverse_trench, fuel_capacity,
+                drive_system, has_turret, can_traverse_trench, preferred_traversal, fuel_capacity,
                 robot_photo
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             data.timestamp or scanned_at, scanned_at,
             data.pre_team_number, data.pre_scouter_name.strip().lower(),
-            data.drive_system, data.has_turret, data.can_traverse_trench, data.fuel_capacity,
+            data.drive_system, data.has_turret, data.can_traverse_trench, data.preferred_traversal, data.fuel_capacity,
             pre_photo_blob
         ))
         conn.commit()
