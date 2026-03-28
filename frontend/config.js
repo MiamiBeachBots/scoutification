@@ -20,7 +20,8 @@ const CONFIG = {
     teleop: { label: "Teleoperated (TELEOP)", tab: "tab_match_scouting" },
     performance: { label: "Advanced Performance Analytics", tab: "tab_match_scouting" },
     endgame: { label: "End Game & Fouls", tab: "tab_match_scouting" },
-    alliance_rp: { label: "Alliance Ranking Points", tab: "tab_match_scouting" }
+    alliance_rp: { label: "Alliance Ranking Points", tab: "tab_match_scouting" },
+    match_photo: { label: "Match Photo", tab: "tab_match_scouting", note: "Direct Server Submission Only." }
   },
 
   fields: [
@@ -81,7 +82,8 @@ const CONFIG = {
       label: "Take Robot Photo",
       type: "file",
       accept: "image/*",
-      category: "pre_photo"
+      category: "pre_photo",
+      wifi_only: true
     },
 
     // ==============================================
@@ -242,6 +244,14 @@ const CONFIG = {
       label: "Do you expect TRAVERSAL RP? (alliance earns 50+ Tower Points)",
       type: "checkbox",
       category: "alliance_rp"
+    },
+    {
+      id: "robot_photo_match",
+      label: "Take Match Photo (Optional)",
+      type: "file",
+      accept: "image/*",
+      category: "match_photo",
+      wifi_only: true
     }
   ]
 };
