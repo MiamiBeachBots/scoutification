@@ -74,6 +74,10 @@ class ScoutingApp {
         Object.keys(CONFIG.categories).forEach(categoryKey => {
             if (!categorizedFields[categoryKey]) return;
             
+            // Filter out wifi_only fields for the QR code submission side
+            const fieldsToRender = categorizedFields[categoryKey].filter(f => !f.wifi_only);
+            if (fieldsToRender.length === 0) return;
+            
             const categoryMeta = CONFIG.categories[categoryKey];
             const section = document.createElement('div');
             section.className = 'form-section';
@@ -90,7 +94,7 @@ class ScoutingApp {
                 section.appendChild(note);
             }
             
-            categorizedFields[categoryKey].forEach(field => {
+            fieldsToRender.forEach(field => {
                 const formGroup = this.createFormField(field);
                 section.appendChild(formGroup);
             });

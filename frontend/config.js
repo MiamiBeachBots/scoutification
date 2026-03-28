@@ -21,7 +21,7 @@ const CONFIG = {
     performance: { label: "Advanced Performance Analytics", tab: "tab_match_scouting" },
     endgame: { label: "End Game & Fouls", tab: "tab_match_scouting" },
     alliance_rp: { label: "Alliance Ranking Points", tab: "tab_match_scouting" },
-    match_photo: { label: "Match Photo", tab: "tab_match_scouting", note: "Photos will NOT be sent via QR code due to size limits. Use WiFi submission." }
+    match_photo: { label: "Match Photo", tab: "tab_match_scouting", note: "Direct Server Submission Only." }
   },
 
   fields: [
@@ -57,6 +57,20 @@ const CONFIG = {
       category: "robot_hardware"
     },
     {
+      id: "can_traverse_trench",
+      label: "Can it traverse under the TRENCH?",
+      type: "dropdown",
+      options: ["Yes", "No"],
+      category: "robot_hardware"
+    },
+    {
+      id: "preferred_traversal",
+      label: "Preferred Field Traversal",
+      type: "dropdown",
+      options: ["Bump", "Trench", "Both", "Neither"],
+      category: "robot_hardware"
+    },
+    {
       id: "fuel_capacity",
       label: "FUEL Capacity (How many can it hold?)",
       type: "number",
@@ -68,7 +82,8 @@ const CONFIG = {
       label: "Take Robot Photo",
       type: "file",
       accept: "image/*",
-      category: "pre_photo"
+      category: "pre_photo",
+      wifi_only: true
     },
 
     // ==============================================
@@ -158,6 +173,13 @@ const CONFIG = {
 
     // ── Advanced Performance
     {
+      id: "preferred_traversal",
+      label: "Preferred Field Traversal",
+      type: "dropdown",
+      options: ["Bump", "Trench", "Both", "Neither"],
+      category: "performance"
+    },
+    {
       id: "shooter_cadence",
       label: "Shooter Cadence (Speed)",
       type: "dropdown",
@@ -228,7 +250,8 @@ const CONFIG = {
       label: "Take Match Photo (Optional)",
       type: "file",
       accept: "image/*",
-      category: "match_photo"
+      category: "match_photo",
+      wifi_only: true
     }
   ]
 };
