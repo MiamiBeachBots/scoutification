@@ -14,15 +14,15 @@
         /* Dark Mode High Contrast Theme */
         :root {
             --bg-primary: #1a1a1a;
-            --bg-secondary: #2d2d2d;
-            --bg-tertiary: #3a3a3a;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --accent-primary: #4CAF50;
-            --accent-secondary: #2196F3;
-            --accent-danger: #f44336;
-            --border-color: #555;
-            --shadow: rgba(0, 0, 0, 0.5);
+            --bg-secondary: #252525;
+            --bg-tertiary: #2f2f2f;
+            --text-primary: #fff0f5;
+            --text-secondary: #e6e6fa;
+            --accent-primary: #ffb7b2;
+            --accent-secondary: #ffdac1;
+            --accent-danger: #ff6961;
+            --border-color: #444;
+            --shadow: rgba(255, 183, 178, 0.3);
         }
         
         * {
@@ -340,6 +340,81 @@
             .btn-group {
                 flex-direction: column;
             }
+        }
+    
+        /* --- OLD SCOUTIFICATION LOOK & FEEL OVERRIDES --- */
+        .form-section {
+            padding: 1rem !important;
+            margin-bottom: 1rem !important;
+            display: grid !important;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+            gap: 1rem !important;
+            align-items: start !important;
+        }
+        .form-section h2 {
+            grid-column: 1 / -1 !important;
+            margin-top: 0 !important;
+            margin-bottom: 0.5rem !important;
+            font-size: 1.2rem !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            padding-bottom: 0.25rem !important;
+        }
+        .form-group {
+            margin-bottom: 0 !important;
+        }
+        label {
+            margin-bottom: 0.25rem !important;
+            font-size: 0.9rem !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+        input, select, textarea {
+            padding: 0.5rem !important;
+            font-size: 0.9rem !important;
+        }
+        .form-group:has(textarea) {
+            grid-column: 1 / -1 !important;
+        }
+        textarea {
+            min-height: 60px !important;
+        }
+        .counter-controls {
+            gap: 0.5rem !important;
+            padding: 0.25rem !important;
+        }
+        .counter-btn {
+            width: 36px !important;
+            height: 36px !important;
+            font-size: 1.2rem !important;
+            border-radius: 4px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        .counter-val {
+            font-size: 1.2rem !important;
+        }
+        .checkbox-wrapper {
+            gap: 0.5rem !important;
+            padding: 0.5rem !important;
+            height: 42px !important;
+        }
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 20px !important;
+            height: 20px !important;
+        }
+        .checkbox-wrapper label {
+            margin-bottom: 0 !important;
+            font-size: 0.9rem !important;
+            white-space: normal !important;
+        }
+        .button-group {
+            margin-top: 1.5rem !important;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem !important;
+            font-size: 1rem !important;
         }
     </style>
 </head>
