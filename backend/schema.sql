@@ -45,6 +45,9 @@ CREATE TABLE IF NOT EXISTS scouting_data (
     
     -- Match Photo
     robot_photo     BLOB,
+    
+    -- General Notes
+    general_notes   TEXT,
 
     -- Unique constraint: one entry per team per match per alliance
     UNIQUE(match_number, team_number, alliance)
@@ -99,8 +102,35 @@ CREATE TABLE IF NOT EXISTS pre_scouting_data (
     can_traverse_trench TEXT,
     preferred_traversal TEXT,
     fuel_capacity      INTEGER DEFAULT 0,
+    turret_fuel_shot_at_once INTEGER DEFAULT 0,
+    
+    expected_auto_fuel INTEGER DEFAULT 0,
+    expected_auto_tower_level1 INTEGER DEFAULT 0,
+    expected_teleop_active INTEGER DEFAULT 0,
+    expected_teleop_inactive INTEGER DEFAULT 0,
+    expected_max_tower TEXT,
+    expected_minor_fouls INTEGER DEFAULT 0,
+    expected_major_fouls INTEGER DEFAULT 0,
+    expected_energized_rp INTEGER DEFAULT 0,
+    expected_supercharged_rp INTEGER DEFAULT 0,
+    expected_traversal_rp INTEGER DEFAULT 0,
+    expected_shooter_accuracy TEXT,
     
     robot_photo        BLOB
 );
 
 CREATE INDEX IF NOT EXISTS idx_pre_team_number ON pre_scouting_data(team_number);
+
+-- Scouters Tracker
+CREATE TABLE IF NOT EXISTS scouters (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS scouter_assignments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    scouter_name TEXT NOT NULL,
+    match_number INTEGER NOT NULL,
+    team_number INTEGER NOT NULL,
+    UNIQUE(match_number, team_number)
+);

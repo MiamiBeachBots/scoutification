@@ -77,6 +77,8 @@ class ScoutingData(BaseModel):
     supercharged_rp: Optional[bool] = False
     traversal_rp:    Optional[bool] = False
 
+    general_notes: Optional[str] = ""
+
     robot_photo_match: Optional[str] = None
 
     @validator('alliance')
@@ -115,6 +117,19 @@ class PreScoutingData(BaseModel):
     can_traverse_trench: Optional[str] = ""
     preferred_traversal: Optional[str] = ""
     fuel_capacity: Optional[int] = 0
+    turret_fuel_shot_at_once: Optional[int] = 0
+
+    expected_auto_fuel: Optional[int] = 0
+    expected_auto_tower_level1: Optional[int] = 0
+    expected_teleop_active: Optional[int] = 0
+    expected_teleop_inactive: Optional[int] = 0
+    expected_max_tower: Optional[str] = "None"
+    expected_minor_fouls: Optional[int] = 0
+    expected_major_fouls: Optional[int] = 0
+    expected_energized_rp: Optional[int] = 0
+    expected_supercharged_rp: Optional[int] = 0
+    expected_traversal_rp: Optional[int] = 0
+    expected_shooter_accuracy: Optional[str] = "N/A"
     
     robot_photo_pre: Optional[str] = None
 
@@ -231,6 +246,7 @@ def save_match_data(data: ScoutingData) -> dict:
         'supercharged_rp': 1 if data.supercharged_rp else 0,
         'traversal_rp':    1 if data.traversal_rp    else 0,
         
+        'general_notes':   data.general_notes or '',
         'robot_photo':     match_photo_blob
     }
 
@@ -245,7 +261,7 @@ def save_match_data(data: ScoutingData) -> dict:
                 teleop_fuel_active_hub, teleop_fuel_inactive_hub, fuel_collection_source,
                 preferred_traversal, shooter_cadence, shooter_accuracy, defensive_phase_summary,
                 max_tower_level, minor_fouls, major_fouls,
-                energized_rp, supercharged_rp, traversal_rp, robot_photo
+                energized_rp, supercharged_rp, traversal_rp, general_notes, robot_photo
             ) VALUES (
                 :timestamp, :scanned_at,
                 :match_number, :team_number, :alliance, :scouter_name,
@@ -254,7 +270,7 @@ def save_match_data(data: ScoutingData) -> dict:
                 :teleop_fuel_active_hub, :teleop_fuel_inactive_hub, :fuel_collection_source,
                 :preferred_traversal, :shooter_cadence, :shooter_accuracy, :defensive_phase_summary,
                 :max_tower_level, :minor_fouls, :major_fouls,
-                :energized_rp, :supercharged_rp, :traversal_rp, :robot_photo
+                :energized_rp, :supercharged_rp, :traversal_rp, :general_notes, :robot_photo
             )
         ''', rec)
         conn.commit()
@@ -283,12 +299,20 @@ def save_pre_scouting_data(data: PreScoutingData) -> dict:
                 timestamp, scanned_at,
                 team_number, scouter_name,
                 drive_system, has_turret, can_traverse_trench, preferred_traversal, fuel_capacity,
+                turret_fuel_shot_at_once, expected_auto_fuel, expected_auto_tower_level1,
+                expected_teleop_active, expected_teleop_inactive, expected_max_tower,
+                expected_minor_fouls, expected_major_fouls, expected_energized_rp,
+                expected_supercharged_rp, expected_traversal_rp, expected_shooter_accuracy,
                 robot_photo
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             data.timestamp or scanned_at, scanned_at,
             data.pre_team_number, data.pre_scouter_name.strip().lower(),
             data.drive_system, data.has_turret, data.can_traverse_trench, data.preferred_traversal, data.fuel_capacity,
+            data.turret_fuel_shot_at_once, data.expected_auto_fuel, data.expected_auto_tower_level1,
+            data.expected_teleop_active, data.expected_teleop_inactive, data.expected_max_tower,
+            data.expected_minor_fouls, data.expected_major_fouls, data.expected_energized_rp,
+            data.expected_supercharged_rp, data.expected_traversal_rp, data.expected_shooter_accuracy,
             pre_photo_blob
         ))
         conn.commit()
@@ -314,6 +338,45 @@ async def get_stats():
     except sqlite3.Error as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
+@app.get("/api/assignments")
+async def get_assignments():
+    try:
+        conn = sqlite3.connect(get_db_path())
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute('SELECT scouter_name, match_number, team_number FROM scouter_assignments ORDER BY match_number, team_number')
+        rows = cur.fetchall()
+        assignments = [dict(row) for row in rows]
+        
+        cur.execute('SELECT name FROM scouters ORDER BY name')
+        scouters = [row['name'] for row in cur.fetchall()]
+        conn.close()
+        return {"assignments": assignments, "scouters": scouters}
+    except sqlite3.Error as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {e}")
+
+class AssignmentData(BaseModel):
+    scouter_name: str
+    match_number: int
+    team_number: int
+
+@app.post("/api/assignments")
+async def save_assignment(data: AssignmentData):
+    try:
+        conn = sqlite3.connect(get_db_path())
+        
+        # Ensure scouter exists
+        conn.execute('INSERT OR IGNORE INTO scouters (name) VALUES (?)', (data.scouter_name,))
+        
+        conn.execute('''
+            INSERT OR REPLACE INTO scouter_assignments (scouter_name, match_number, team_number)
+            VALUES (?, ?, ?)
+        ''', (data.scouter_name, data.match_number, data.team_number))
+        conn.commit()
+        conn.close()
+        return {"status": "success"}
+    except sqlite3.Error as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {e}")
 
 if __name__ == "__main__":
     import uvicorn
