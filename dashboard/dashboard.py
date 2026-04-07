@@ -520,6 +520,88 @@ class ScoutingDashboard:
         return f"<b style='font-size:1.3em;'>Team {t}</b> <span style='float:right;color:#aaa;'>EPA: {epa}</span><br><br><b>Avg Scored:</b> {avg_hub} HUB | Tower Lvl {avg_twr}<br><b>Drive:</b> {drive} | <b>Under Trench:</b> {trench}{status_note}"
 
 
+    # ──────────────────────────────────────────────────────────────
+    # Assignments Portal & Tracker Tab
+    # ──────────────────────────────────────────────────────────────
+
+    def assignments_tab(self):
+        st.header("🎛️ Assignments Portal")
+        st.markdown("Assign teams and matches to scouters, and track their performance.")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.subheader("Add Scouter")
+            new_scouter = st.text_input("Scouter Name")
+            if st.button("Add Scouter", type="primary"):
+                if new_scouter:
+                    try:
+                        conn = sqlite3.connect(self.db_path)
+                        conn.execute('INSERT OR IGNORE INTO scouters (name) VALUES (?)', (new_scouter.strip().lower(),))
+                        conn.commit()
+                        conn.close()
+                        st.success(f"Added scouter: {new_scouter.strip().lower()}")
+                    except Exception as e:
+                        st.error(f"Error adding scouter: {e}")
+
+        with col2:
+            st.subheader("Assign Team")
+            try:
+                conn = sqlite3.connect(self.db_path)
+                # Create tables if they don't exist yet just in case
+                conn.execute('''CREATE TABLE IF NOT EXISTS scouters (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE)''')
+                conn.execute('''CREATE TABLE IF NOT EXISTS scouter_assignments (id INTEGER PRIMARY KEY AUTOINCREMENT, scouter_name TEXT NOT NULL, match_number INTEGER NOT NULL, team_number INTEGER NOT NULL, UNIQUE(match_number, team_number))''')
+                scouters = [row[0] for row in conn.execute('SELECT name FROM scouters ORDER BY name').fetchall()]
+                conn.close()
+            except:
+                scouters = []
+
+            if not scouters:
+                st.info("No scouters added yet. Add one on the left.")
+            else:
+                a_scouter = st.selectbox("Scouter", scouters)
+                c_match, c_team = st.columns(2)
+                a_match = c_match.number_input("Match Number", min_value=1, value=1)
+                a_team = c_team.number_input("Team Number", min_value=1, value=1)
+                if st.button("Assign"):
+                    try:
+                        conn = sqlite3.connect(self.db_path)
+                        conn.execute('INSERT OR REPLACE INTO scouter_assignments (scouter_name, match_number, team_number) VALUES (?, ?, ?)',
+                                     (a_scouter, a_match, a_team))
+                        conn.commit()
+                        conn.close()
+                        st.success(f"Assigned Match {a_match}, Team {a_team} to {a_scouter}")
+                    except Exception as e:
+                        st.error(f"Error assigning: {e}")
+
+        st.markdown("---")
+        st.subheader("Scouter Performance & Assignments")
+        
+        try:
+            conn = sqlite3.connect(self.db_path)
+            assignments_query = """
+                SELECT a.scouter_name, a.match_number, a.team_number,
+                       CASE WHEN s.id IS NOT NULL THEN '✅ Completed' ELSE '❌ Pending' END AS status
+                FROM scouter_assignments a
+                LEFT JOIN scouting_data s ON a.match_number = s.match_number AND a.team_number = s.team_number AND a.scouter_name = s.scouter_name
+                ORDER BY a.match_number, a.team_number
+            """
+            a_df = pd.read_sql_query(assignments_query, conn)
+            conn.close()
+            
+            if not a_df.empty:
+                st.dataframe(a_df, use_container_width=True, hide_index=True)
+                
+                st.write("**Completion Rates:**")
+                completion = a_df.groupby('scouter_name')['status'].apply(lambda x: (x == '✅ Completed').mean() * 100).reset_index()
+                completion.columns = ['Scouter', 'Completion %']
+                completion['Completion %'] = completion['Completion %'].round(1)
+                st.dataframe(completion, use_container_width=True, hide_index=True)
+            else:
+                st.info("No assignments yet.")
+                
+        except Exception as e:
+            st.error(f"Error loading assignments: {e}")
+
 def main():
     st.set_page_config(
         page_title="FRC Scouting – REBUILT 2026",
@@ -533,14 +615,15 @@ def main():
     st.sidebar.markdown("✨ **Made by Thalia**")
 
     dash = ScoutingDashboard()
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "Pick List", "Team Analysis", "Match Predictor", "Match Preview", "Raw Data"
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+        "Pick List", "Team Analysis", "Match Predictor", "Match Preview", "Raw Data", "Assignments"
     ])
     with tab1: dash.pick_list_formulation_tab()
     with tab2: dash.team_analysis_tab()
     with tab3: dash.match_predictor_tab()
     with tab4: dash.match_preview_tab()
     with tab5: dash.raw_data_tab()
+    with tab6: dash.assignments_tab()
 
 
 if __name__ == '__main__':

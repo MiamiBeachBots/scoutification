@@ -11,15 +11,16 @@ const CONFIG = {
     // PRE-SCOUTING TABS
     team_info: { label: "Team Information", tab: "tab_pre_scouting" },
     robot_hardware: { label: "Robot Hardware", tab: "tab_pre_scouting" },
+    expectations: { label: "Performance Expectations", tab: "tab_pre_scouting" },
     pre_photo: { label: "Robot Photo", tab: "tab_pre_scouting", note: "Photos will NOT be sent via QR code due to size limits. Use WiFi submission." },
 
     // MATCH SCOUTING TABS
     match_info: { label: "Match Information", tab: "tab_match_scouting" },
-    pre_match: { label: "Pre-Match Expectations", tab: "tab_match_scouting" },
+    pre_match: { label: "Pre-Match Info", tab: "tab_match_scouting" },
     autonomous: { label: "Autonomous (AUTO)", tab: "tab_match_scouting" },
     teleop: { label: "Teleoperated (TELEOP)", tab: "tab_match_scouting" },
     performance: { label: "Advanced Performance Analytics", tab: "tab_match_scouting" },
-    endgame: { label: "End Game & Fouls", tab: "tab_match_scouting" },
+    endgame: { label: "End Game & Notes", tab: "tab_match_scouting" },
     alliance_rp: { label: "Alliance Ranking Points", tab: "tab_match_scouting" },
     match_photo: { label: "Match Photo", tab: "tab_match_scouting", note: "Direct Server Submission Only." }
   },
@@ -57,6 +58,13 @@ const CONFIG = {
       category: "robot_hardware"
     },
     {
+      id: "turret_fuel_shot_at_once",
+      label: "How many FUEL is being shot at once?",
+      type: "number",
+      min: 0,
+      category: "robot_hardware"
+    },
+    {
       id: "can_traverse_trench",
       label: "Can it traverse under the TRENCH?",
       type: "dropdown",
@@ -84,6 +92,79 @@ const CONFIG = {
       accept: "image/*",
       category: "pre_photo",
       wifi_only: true
+    },
+    {
+      id: "expected_auto_fuel",
+      label: "Expected AUTO FUEL in Active HUB",
+      type: "number",
+      min: 0,
+      category: "expectations"
+    },
+    {
+      id: "expected_auto_tower_level1",
+      label: "Expect TOWER Level 1 in AUTO?",
+      type: "checkbox",
+      category: "expectations"
+    },
+    {
+      id: "expected_teleop_active",
+      label: "Expected TELEOP FUEL in Active HUB",
+      type: "number",
+      min: 0,
+      category: "expectations"
+    },
+    {
+      id: "expected_teleop_inactive",
+      label: "Expected TELEOP FUEL in Inactive HUB",
+      type: "number",
+      min: 0,
+      category: "expectations"
+    },
+    {
+      id: "expected_max_tower",
+      label: "Expected max TOWER level",
+      type: "dropdown",
+      options: ["None", "Level 1", "Level 2", "Level 3"],
+      category: "expectations"
+    },
+    {
+      id: "expected_minor_fouls",
+      label: "Expected minor fouls",
+      type: "number",
+      min: 0,
+      category: "expectations"
+    },
+    {
+      id: "expected_major_fouls",
+      label: "Expected major fouls",
+      type: "number",
+      min: 0,
+      category: "expectations"
+    },
+    {
+      id: "expected_energized_rp",
+      label: "Expect ENERGIZED RP?",
+      type: "checkbox",
+      category: "expectations"
+    },
+    {
+      id: "expected_supercharged_rp",
+      label: "Expect SUPERCHARGED RP?",
+      type: "checkbox",
+      category: "expectations"
+    },
+    {
+      id: "expected_traversal_rp",
+      label: "Expect TRAVERSAL RP?",
+      type: "checkbox",
+      category: "expectations"
+    },
+    {
+      id: "expected_shooter_accuracy",
+      label: "Estimated Shooter Accuracy",
+      type: "dropdown",
+      options: ["High (>80%)", "Average (50-80%)", "Low (<50%)", "N/A"],
+      category: "expectations"
     },
 
     // ==============================================
@@ -133,7 +214,7 @@ const CONFIG = {
     // ── Autonomous
     {
       id: "auto_fuel_active_hub",
-      label: "How many FUEL do you expect in the Active HUB during AUTO?",
+      label: "How many FUEL was scored in the Active HUB during AUTO?",
       type: "counter",
       min: 0,
       max: 999,
@@ -141,7 +222,7 @@ const CONFIG = {
     },
     {
       id: "auto_tower_level1",
-      label: "Do you expect this robot to reach TOWER Level 1 in AUTO?",
+      label: "Did this robot reach TOWER Level 1 in AUTO?",
       type: "checkbox",
       category: "autonomous"
     },
@@ -149,7 +230,7 @@ const CONFIG = {
     // ── Teleoperated
     {
       id: "teleop_fuel_active_hub",
-      label: "How many FUEL do you expect in the Active HUB during TELEOP?",
+      label: "How many FUEL was scored in the Active HUB during TELEOP?",
       type: "counter",
       min: 0,
       max: 999,
@@ -157,7 +238,7 @@ const CONFIG = {
     },
     {
       id: "teleop_fuel_inactive_hub",
-      label: "Do you expect any FUEL in the Inactive HUB? (estimate)",
+      label: "How many FUEL was scored in the Inactive HUB?",
       type: "counter",
       min: 0,
       max: 999,
@@ -165,7 +246,7 @@ const CONFIG = {
     },
     {
       id: "fuel_collection_source",
-      label: "Where does this robot primarily collect FUEL?",
+      label: "Where did this robot primarily collect FUEL?",
       type: "dropdown",
       options: ["Depot", "Neutral Zone", "Outpost"],
       category: "teleop"
@@ -204,14 +285,14 @@ const CONFIG = {
     // ── End Game
     {
       id: "max_tower_level",
-      label: "What is the highest TOWER Level you expect this robot to reach?",
+      label: "What was the highest TOWER Level reached?",
       type: "dropdown",
       options: ["None", "Level 1", "Level 2", "Level 3"],
       category: "endgame"
     },
     {
       id: "minor_fouls",
-      label: "How many Minor Fouls do you expect from this robot?",
+      label: "How many Minor Fouls did they commit?",
       type: "counter",
       min: 0,
       max: 20,
@@ -219,29 +300,35 @@ const CONFIG = {
     },
     {
       id: "major_fouls",
-      label: "How many Major Fouls do you expect from this robot?",
+      label: "How many Major Fouls did they commit?",
       type: "counter",
       min: 0,
       max: 10,
+      category: "endgame"
+    },
+    {
+      id: "general_notes",
+      label: "General Notes",
+      type: "textarea",
       category: "endgame"
     },
 
     // ── Alliance Ranking Points
     {
       id: "energized_rp",
-      label: "Do you expect ENERGIZED RP? (alliance scores 100+ Active HUB FUEL)",
+      label: "Did the alliance earn ENERGIZED RP?",
       type: "checkbox",
       category: "alliance_rp"
     },
     {
       id: "supercharged_rp",
-      label: "Do you expect SUPERCHARGED RP? (alliance scores 360+ Active HUB FUEL)",
+      label: "Did the alliance earn SUPERCHARGED RP?",
       type: "checkbox",
       category: "alliance_rp"
     },
     {
       id: "traversal_rp",
-      label: "Do you expect TRAVERSAL RP? (alliance earns 50+ Tower Points)",
+      label: "Did the alliance earn TRAVERSAL RP?",
       type: "checkbox",
       category: "alliance_rp"
     },
