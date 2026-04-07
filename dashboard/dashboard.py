@@ -416,9 +416,9 @@ class ScoutingDashboard:
         st.markdown("Fetch upcoming matches from The Blue Alliance to view EPAs and Scouting Data.")
         
         c1, c2, c3 = st.columns(3)
-        tba_key = c1.text_input("TBA Event Key (e.g., 2026txhou)", value="2026txhou")
+        tba_key = c1.text_input("TBA Event Key", value="2026flsh", help="Find your event key on bluealliance.com (e.g., 2026flsh)")
         match_num = c2.number_input("Qual Match Number", min_value=1, value=1)
-        api_key = c3.text_input("TBA API Key (Optional for cached)", type="password", help="Get from thebluealliance.com/account")
+        api_key = c3.text_input("TBA API Key", type="password", help="Required for live TBA sync. Get one at thebluealliance.com/account")
         
         if st.button("Load Preview", type="primary"):
             if not tba_key:
@@ -433,20 +433,37 @@ class ScoutingDashboard:
                 blue_teams = []
                 
                 try:
-                    resp = requests.get(url, headers=headers, timeout=3)
+                    resp = requests.get(url, headers=headers, timeout=5)
                     if resp.status_code == 200:
                         data = resp.json()
                         red_teams = [int(t.replace('frc','')) for t in data['alliances']['red']['team_keys']]
                         blue_teams = [int(t.replace('frc','')) for t in data['alliances']['blue']['team_keys']]
+                        st.success(f"✓ Synced Match {match_num} from TBA")
+                    elif resp.status_code == 401:
+                        st.error("TBA Error 401: Unauthorized. Please provide a valid **TBA API Key** in the input above. (Get one at thebluealliance.com/account)")
                     else:
-                        st.warning(f"TBA sync failed (Status {resp.status_code}). Please enter teams manually if needed.")
+                        st.warning(f"TBA sync failed (Status {resp.status_code}).")
                 except Exception as e:
                     st.warning(f"TBA connection error: {e}")
-                    
+                
+                # Manual Override Checkbox (Persist in session state)
                 if not red_teams or not blue_teams:
-                    st.info("Loading dummy teams for preview since TBA failed (e.g. no API key).")
-                    red_teams = [254, 1678, 1323]
-                    blue_teams = [2056, 118, 148]
+                    st.info("💡 You can manually enter the teams below since the TBA sync failed.")
+                    
+                    c1, c2 = st.columns(2)
+                    m1, m2, m3 = c1.columns(3)
+                    red_teams = [
+                        m1.number_input("Red 1", min_value=1, value=254, key="r1"),
+                        m2.number_input("Red 2", min_value=1, value=1678, key="r2"),
+                        m3.number_input("Red 3", min_value=1, value=1323, key="r3")
+                    ]
+                    
+                    b1, b2, b3 = c2.columns(3)
+                    blue_teams = [
+                        b1.number_input("Blue 1", min_value=1, value=2056, key="b1"),
+                        b2.number_input("Blue 2", min_value=1, value=118, key="b2"),
+                        b3.number_input("Blue 3", min_value=1, value=148, key="b3")
+                    ]
                     
                 self._render_match_preview(red_teams, blue_teams)
 
@@ -469,23 +486,38 @@ class ScoutingDashboard:
     def _html_card(self, t, df, pre_df):
         epa = "N/A"
         try:
-            # Try Statbotics v2 which is very stable: /v2/team_year/TEAM/YEAR
-            res = requests.get(f"https://api.statbotics.io/v2/team_year/{t}/2026", timeout=2)
+            # Try Statbotics v3 (current 2026)
+            res = requests.get(f"https://api.statbotics.io/v3/team_year/{t}/2026", timeout=2)
             if res.status_code == 200:
-                epa = round(res.json().get('epa_end', 0), 1)
+                data = res.json()
+                # v3 structure: epa['total_points']['mean']
+                epa_val = data.get('epa', {}).get('total_points', {}).get('mean', 0)
+                if epa_val > 0:
+                    epa = round(epa_val, 1)
+                else:
+                    # Fallback to 2025 EPA if 2026 is zero/new
+                    res2 = requests.get(f"https://api.statbotics.io/v3/team_year/{t}/2025", timeout=2)
+                    if res2.status_code == 200:
+                        epa_val2 = res2.json().get('epa', {}).get('total_points', {}).get('mean', 0)
+                        if epa_val2 > 0:
+                            epa = f"{round(epa_val2, 1)} (2025)"
         except Exception:
             pass
             
         scout = df[df['team_number'] == t].iloc[0] if (not df.empty and t in df['team_number'].values) else None
         pit = pre_df[pre_df['team_number'] == t].iloc[0] if (not pre_df.empty and t in pre_df['team_number'].values) else None
         
-        drive = pit['drive_system'] if pit is not None and not pd.isna(pit['drive_system']) else '?'
-        trench = pit['can_traverse_trench'] if pit is not None and not pd.isna(pit['can_traverse_trench']) else '?'
+        drive = pit['drive_system'] if pit is not None and not pd.isna(pit['drive_system']) else 'Not Scouted'
+        trench = pit['can_traverse_trench'] if pit is not None and not pd.isna(pit['can_traverse_trench']) else 'Not Scouted'
         
         avg_hub = f"{scout['Avg_Total_Active_Hub']:.1f}" if scout is not None else '?'
         avg_twr = f"{scout['Avg_Tower_Level']:.1f}" if scout is not None else '?'
         
-        return f"<b style='font-size:1.3em;'>Team {t}</b> <span style='float:right;color:#aaa;'>EPA: {epa}</span><br><br><b>Avg Scored:</b> {avg_hub} HUB | Tower Lvl {avg_twr}<br><b>Drive:</b> {drive} | <b>Under Trench:</b> {trench}"
+        status_note = ""
+        if scout is None:
+            status_note = "<br><i style='color:#f8d7da;font-size:0.8em;'>Note: No match data collected yet for this team.</i>"
+        
+        return f"<b style='font-size:1.3em;'>Team {t}</b> <span style='float:right;color:#aaa;'>EPA: {epa}</span><br><br><b>Avg Scored:</b> {avg_hub} HUB | Tower Lvl {avg_twr}<br><b>Drive:</b> {drive} | <b>Under Trench:</b> {trench}{status_note}"
 
 
 def main():
